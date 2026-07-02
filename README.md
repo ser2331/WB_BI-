@@ -60,11 +60,13 @@ UI: http://localhost:5173
 |------|-----|
 | **GitHub** | Исходный код |
 | **GitHub Pages** | Фронтенд (автодеплой через Actions) |
-| **Render** | Бэкенд FastAPI (`render.yaml` в корне) |
+| **Railway** | Бэкенд FastAPI (`backend/railway.toml`) |
 
 После деплоя:
 - Pages: `https://YOUR_USERNAME.github.io/WB_BI/`
-- API: `https://wb-bi-api.onrender.com/api/health`
+- API: `https://your-app.up.railway.app/api/health`
+
+Подробно: **[RAILWAY.md](RAILWAY.md)**
 
 ## Демо-режим (без аккаунта WB)
 

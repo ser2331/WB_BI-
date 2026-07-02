@@ -1,12 +1,16 @@
-# Деплой: GitHub + GitHub Pages + Render
+# Деплой: GitHub + GitHub Pages + Railway
 
 Схема:
 
 ```
 GitHub repo
 ├── frontend  →  GitHub Pages   (статический React)
-└── backend   →  Render         (FastAPI API)
+└── backend   →  Railway        (FastAPI API)
 ```
+
+> **Бэкенд на Railway:** пошаговая инструкция → **[RAILWAY.md](RAILWAY.md)**
+
+С Render можно не мучиться — Railway обычно проще войти через GitHub.
 
 ## 1. Залить на GitHub
 
@@ -22,35 +26,21 @@ git push -u origin main
 
 > Замените `YOUR_USERNAME/WB_BI` на свой репозиторий.
 
-## 2. Бэкенд на Render
+## 2. Бэкенд на Railway (рекомендуется)
 
-> **Не получается войти в Render?** См. раздел [Проблемы с Render](#проблемы-с-render) ниже — есть альтернативы.
+Полная инструкция: **[RAILWAY.md](RAILWAY.md)**
 
-1. [render.com](https://render.com) → **Get Started** → **Sign in with GitHub** (или email).
-2. **New** → **Blueprint** (или Web Service).
-3. Подключите GitHub-репозиторий.
-4. Render подхватит `render.yaml` в корне проекта.
-5. В **Environment** задайте `CORS_ORIGINS`:
+Кратко:
 
-   ```
-   https://YOUR_USERNAME.github.io,http://localhost:5173
-   ```
+1. [railway.app](https://railway.app) → **Deploy from GitHub** → репозиторий `WB_BI`
+2. **Root Directory** = `backend`
+3. **Generate Domain** → скопировать URL
+4. Variables: `CORS_ORIGINS=https://YOUR_USERNAME.github.io,http://localhost:5173`
+5. GitHub Secret `VITE_API_URL` = URL Railway (без `/api`)
 
-   Без слэша в конце, через запятую.
+### Альтернатива: Render
 
-5. После деплоя скопируйте URL сервиса, например:
-   `https://wb-bi-api.onrender.com`
-
-6. Проверка: `https://wb-bi-api.onrender.com/api/health`
-
-### Переменные Render (из render.yaml)
-
-| Переменная | Значение | Комментарий |
-|------------|----------|-------------|
-| `MOCK_WB` | `true` | Демо без WB-токена (можно `false` для боя) |
-| `AUTO_SEED_MOCK` | `true` | Автозаполнение дашборда |
-| `DATABASE_URL` | `sqlite+aiosqlite:////tmp/wb_bi.db` | На free-тарифе данные могут сбрасываться при редеплое |
-| `CORS_ORIGINS` | ваш GitHub Pages URL | **обязательно вручную** |
+См. `render.yaml` в корне — если Railway не подойдёт.
 
 ## 3. Фронтенд на GitHub Pages
 
