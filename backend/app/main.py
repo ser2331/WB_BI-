@@ -51,3 +51,12 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+
+@app.get("/")
+async def root():
+    return {
+        "service": "WB BI API",
+        "health": "/api/health",
+        "docs": "/docs",
+    }
