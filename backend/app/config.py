@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     debug: bool = False
     database_url: str = "sqlite+aiosqlite:///./wb_bi.db"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # Разрешает GitHub Pages (Origin: https://username.github.io)
+    cors_origin_regex: str = r"https://([a-zA-Z0-9-]+\.)?github\.io"
     mock_wb: bool = False
     auto_seed_mock: bool = False
 

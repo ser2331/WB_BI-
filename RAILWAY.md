@@ -12,19 +12,46 @@
 
 1. **New Project** → **Deploy from GitHub repo**
 2. Выбери репозиторий **WB_BI**
-3. Railway создаст сервис — сразу открой его **Settings**:
+3. Railway создаст серvice — сразу открой его **Settings**:
 
 | Параметр | Значение |
 |----------|----------|
 | **Root Directory** | `backend` |
 | **Watch Paths** | `backend/**` (опционально) |
 
-4. **Settings → Networking → Generate Domain** — получишь URL вида:
+4. Дождись успешного **Deploy** (зелёный статус в Deployments).
+
+5. **Settings → Networking → Public Networking**:
+
+   ### ✅ Правильно: сгенерировать домен Railway
+
+   Нажми кнопку **Generate Domain** — Railway сам создаст адрес вида:
    ```
    https://wb-bi-production-xxxx.up.railway.app
    ```
+   **Ничего вручную в поле вводить не нужно.**
 
-5. Проверка в браузере:
+   ### ❌ Ошибка `Malformed Domain`
+
+   Появляется, если в поле **Custom Domain** вставить:
+
+   | Неправильно | Почему |
+   |-------------|--------|
+   | `https://ser2331.github.io` | это GitHub Pages, не домен для Railway |
+   | `https://something.up.railway.app` | нельзя `https://` |
+   | `ser2331.github.io/WB_BI/` | нельзя путь `/WB_BI/` |
+   | `localhost:8000` | не публичный домен |
+
+   **Custom Domain** нужен только если у тебя **свой** домен (`myshop.ru`) — без `https://`, без `/`.
+
+   URL GitHub Pages (`https://ser2331.github.io`) указывается **только** в переменной `CORS_ORIGINS`, не в Networking.
+
+6. Если кнопки **Generate Domain** нет:
+   - Удали **TCP Proxy**, если он включён (иконка корзины)
+   - Убедись, что деплой прошёл без ошибок
+   - В **Networking** укажи порт **8000** (или оставь авто — Railway подставит `$PORT`)
+
+7. Проверка в браузере:
    ```
    https://ТВОЙ-URL.up.railway.app/api/health
    ```
@@ -40,9 +67,12 @@ AUTO_SEED_MOCK=true
 DEBUG=false
 DATABASE_URL=sqlite+aiosqlite:////tmp/wb_bi.db
 CORS_ORIGINS=https://ser2331.github.io,http://localhost:5173
+CORS_ORIGIN_REGEX=https://([a-zA-Z0-9-]+\.)?github\.io
 ```
 
-> `CORS_ORIGINS` — без слэша в конце, через запятую.
+> **CORS:** без `CORS_ORIGINS` фронт на GitHub Pages получит `Failed to fetch`.  
+> Origin всегда `https://ser2331.github.io` (без `/WB_BI/`).  
+> `CORS_ORIGIN_REGEX` уже есть в коде по умолчанию — после push бэкенд пустит все `*.github.io`.
 
 После изменения переменных Railway перезапустит сервис автоматически.
 
@@ -74,6 +104,7 @@ cd frontend && npm run dev
 
 | Проблема | Решение |
 |----------|---------|
+| **Malformed Domain** | Не вводи URL в Custom Domain. Используй **Generate Domain**. GitHub URL — только в `CORS_ORIGINS` |
 | Build failed | Убедись, что **Root Directory** = `backend` |
 | CORS error в браузере | Проверь `CORS_ORIGINS` = `https://ser2331.github.io` |
 | 502 / Application failed | **Deployments** → View logs, ищи ошибку Python |
