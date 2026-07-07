@@ -9,9 +9,11 @@ import { logout } from '@/store/authSlice';
 import type {
   DashboardMeta,
   DashboardQueryParams,
+  DashboardCharts,
   FilterOptions,
   PaginatedBlocks,
   PaginatedCategories,
+  PaginatedProducts,
   PhotoResolveResponse,
 } from '@/types/dashboardApi';
 import type { ImportResponse } from '@/types/dashboard';
@@ -33,7 +35,9 @@ export type CategoryBlocksQueryArgs = Omit<DashboardQueryParams, 'subject'> & {
   subject: string;
 };
 
-function buildParams(params: Record<string, string | number | undefined>): Record<string, string> {
+function buildParams(
+  params: Record<string, string | number | undefined>
+): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') out[key] = String(value);
@@ -65,6 +69,39 @@ export const wbApi = createApi({
 
     getDashboardFilters: builder.query<FilterOptions, void>({
       query: () => '/dashboard/filters',
+      providesTags: ['Dashboard'],
+    }),
+
+    getDashboardCharts: builder.query<
+      DashboardCharts,
+      Pick<DashboardQueryParams, 'periodKey' | 'subject' | 'brand' | 'search'>
+    >({
+      query: (params) => ({
+        url: '/dashboard/charts',
+        params: buildParams({
+          periodKey: params.periodKey,
+          subject: params.subject,
+          brand: params.brand,
+          search: params.search,
+        }),
+      }),
+      providesTags: ['Dashboard'],
+    }),
+
+    getProductsTable: builder.query<PaginatedProducts, DashboardQueryParams>({
+      query: (params) => ({
+        url: '/dashboard/products',
+        params: buildParams({
+          periodKey: params.periodKey,
+          subject: params.subject,
+          brand: params.brand,
+          search: params.search,
+          page: params.page,
+          page_size: params.pageSize,
+          sortBy: params.sortBy,
+          sortDir: params.sortDir,
+        }),
+      }),
       providesTags: ['Dashboard'],
     }),
 
@@ -130,6 +167,8 @@ export const {
   useGetMeQuery,
   useGetDashboardMetaQuery,
   useGetDashboardFiltersQuery,
+  useGetDashboardChartsQuery,
+  useGetProductsTableQuery,
   useGetCategoriesQuery,
   useGetCategoryBlocksQuery,
   useLazyResolveProductPhotoQuery,

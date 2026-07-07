@@ -2,19 +2,24 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.schemas.dashboard_api import (
+    DashboardCharts,
     DashboardMeta,
     FilterOptions,
     PaginatedBlocks,
     PaginatedCategories,
+    PaginatedProducts,
     PhotoResolveResponse,
 )
 from app.services.dataset_memory import get_dataset
 from app.services.dataset_query import (
     QueryFilters,
     aggregate_categories,
+    build_dashboard_charts,
     compute_kpis,
     filter_blocks,
+    flatten_product_rows,
     paginate_list,
+    sort_product_rows,
 )
 from app.services.photo_resolver import resolve_product_photo
 
@@ -75,6 +80,37 @@ async def dashboard_filters():
         periods=dataset.periods,
         subjects=dataset.subjects,
         brands=dataset.brands,
+    )
+
+
+@router.get("/charts", response_model=DashboardCharts)
+async def dashboard_charts(filters: QueryFilters = Depends(_parse_filters)):
+    dataset = _require_dataset()
+    blocks = filter_blocks(dataset.blocks, filters)
+    return DashboardCharts(**build_dashboard_charts(blocks, dataset))
+
+
+@router.get("/products", response_model=PaginatedProducts)
+async def list_products(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=200),
+    sort_by: str = Query("orders", alias="sortBy"),
+    sort_dir: str = Query("desc", alias="sortDir"),
+    filters: QueryFilters = Depends(_parse_filters),
+):
+    dataset = _require_dataset()
+    blocks = filter_blocks(dataset.blocks, filters)
+    rows = sort_product_rows(flatten_product_rows(blocks), sort_by=sort_by, sort_dir=sort_dir)
+    page_items, total_pages, total, from_idx, to_idx = paginate_list(rows, page, page_size)
+    return PaginatedProducts(
+        items=page_items,
+        page=page if total else 1,
+        page_size=page_size,
+        total=total,
+        total_pages=total_pages,
+        from_index=from_idx,
+        to_index=to_idx,
+        kpis=compute_kpis(blocks, dataset),
     )
 
 

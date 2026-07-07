@@ -65,3 +65,49 @@ class PaginatedBlocks(BaseModel):
 class PhotoResolveResponse(BaseModel):
     nm: str
     url: str | None = None
+
+
+class ChartPoint(BaseModel):
+    label: str
+    value: float
+
+
+class OrdersSalesPoint(BaseModel):
+    label: str
+    orders: float
+    sales: float
+
+
+class DashboardCharts(BaseModel):
+    kpis: DashboardKpis
+    orders_by_subject: list[ChartPoint] = Field(default_factory=list)
+    sales_by_subject: list[ChartPoint] = Field(default_factory=list)
+    orders_by_period: list[ChartPoint] = Field(default_factory=list)
+    top_brands: list[ChartPoint] = Field(default_factory=list)
+    orders_vs_sales: list[OrdersSalesPoint] = Field(default_factory=list)
+
+
+class ProductTableRow(BaseModel):
+    nm: str
+    vendor_code: str | None = None
+    brand: str | None = None
+    subject: str | None = None
+    period_key: str | None = None
+    period_label: str | None = None
+    glue_title: str | None = None
+    orders: float | None = None
+    sales: float | None = None
+    stock: float | None = None
+    spp: float | None = None
+    ad_ctr: float | None = None
+
+
+class PaginatedProducts(BaseModel):
+    items: list[ProductTableRow]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+    from_index: int = 0
+    to_index: int = 0
+    kpis: DashboardKpis

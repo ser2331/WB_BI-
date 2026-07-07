@@ -12,8 +12,9 @@ import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { HeroSection } from '@/components/dashboard/HeroSection';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
+import { PageOverlay } from '@/components/ui/PageOverlay';
 import { fmtNum } from '@/utils/format';
-import { Alert, Button, Card, Empty, Space, Typography } from 'antd';
+import { Button, Card, Empty, Space, Typography } from 'antd';
 
 export function CategoriesPage() {
   const navigate = useNavigate();
@@ -31,11 +32,13 @@ export function CategoriesPage() {
   const {
     data,
     isLoading: categoriesLoading,
+    isFetching: categoriesFetching,
     error: categoriesError,
   } = useGetCategoriesQuery(apiQuery, { skip: !hasData });
 
   const loading = metaLoading || (hasData && categoriesLoading && !data);
   const error = getErrorMessage(metaError ?? filtersError ?? categoriesError, '');
+  const busy = hasData && categoriesFetching && !categoriesLoading;
 
   const openCategory = (subject: string) => {
     const q = buildQueryString({
@@ -57,10 +60,7 @@ export function CategoriesPage() {
 
   if (!hasData) {
     return (
-      <div className={layoutClass.dashboardRoot}>
-        {error ? (
-          <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />
-        ) : null}
+      <PageOverlay className={layoutClass.dashboardRoot} error={error || null}>
         <Card>
           <Empty description="Данные ещё не загружены">
             {isAdmin ? (
@@ -74,14 +74,12 @@ export function CategoriesPage() {
             )}
           </Empty>
         </Card>
-      </div>
+      </PageOverlay>
     );
   }
 
   return (
-    <div className={layoutClass.dashboardRoot}>
-      {error ? <Alert type="error" message={error} showIcon style={{ marginBottom: 8 }} /> : null}
-
+    <PageOverlay className={layoutClass.dashboardRoot} busy={busy} error={error || null}>
       <section className={layoutClass.dashboardSection} id="overview">
         <HeroSection meta={meta ?? null} kpis={data?.kpis ?? null} />
       </section>
@@ -157,6 +155,6 @@ export function CategoriesPage() {
           {meta.limits}
         </Typography.Text>
       ) : null}
-    </div>
+    </PageOverlay>
   );
 }

@@ -1,4 +1,6 @@
 import {
+  BarChartOutlined,
+  DatabaseOutlined,
   FolderOpenOutlined,
   LogoutOutlined,
   MoonOutlined,
@@ -20,6 +22,20 @@ const { Header, Sider, Content } = AntLayout;
 const allNavItems = [
   { key: '/', label: 'Категории', icon: <TableOutlined />, shortTitle: 'Категории', adminOnly: false },
   {
+    key: '/analytics',
+    label: 'Дашборд',
+    icon: <BarChartOutlined />,
+    shortTitle: 'Дашборд',
+    adminOnly: false,
+  },
+  {
+    key: '/data',
+    label: 'Таблица',
+    icon: <DatabaseOutlined />,
+    shortTitle: 'Таблица',
+    adminOnly: false,
+  },
+  {
     key: '/import',
     label: 'Импорт',
     icon: <FolderOpenOutlined />,
@@ -30,6 +46,8 @@ const allNavItems = [
 
 const pageTitles: Record<string, string> = {
   '/': 'Категории',
+  '/analytics': 'Аналитика',
+  '/data': 'Таблица данных',
   '/import': 'Импорт данных',
 };
 

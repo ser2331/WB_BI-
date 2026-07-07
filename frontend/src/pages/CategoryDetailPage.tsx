@@ -13,7 +13,8 @@ import { GlueBlocksList } from '@/components/dashboard/GlueBlock';
 import { HeroSection } from '@/components/dashboard/HeroSection';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
-import { Alert, Button, Card, Empty, Space } from 'antd';
+import { PageOverlay } from '@/components/ui/PageOverlay';
+import { Button, Card, Empty, Space } from 'antd';
 
 export function CategoryDetailPage() {
   const { subject: subjectParam } = useParams<{ subject: string }>();
@@ -44,6 +45,7 @@ export function CategoryDetailPage() {
   const {
     data,
     isLoading: blocksLoading,
+    isFetching: blocksFetching,
     error: blocksError,
   } = useGetCategoryBlocksQuery(blocksQuery, { skip: !subject });
 
@@ -57,12 +59,15 @@ export function CategoryDetailPage() {
 
   const loading = metaLoading || (blocksLoading && !data);
   const error = getErrorMessage(metaError ?? filtersError ?? blocksError, '');
+  const busy = Boolean(subject) && blocksFetching && !blocksLoading;
 
   if (!subject) {
     return (
-      <div className={layoutClass.dashboardRoot}>
-        <Alert type="error" message="Категория не указана" showIcon />
-      </div>
+      <PageOverlay className={layoutClass.dashboardRoot} error="Категория не указана">
+        <Card>
+          <Empty description="Выберите категорию из списка" />
+        </Card>
+      </PageOverlay>
     );
   }
 
@@ -75,14 +80,12 @@ export function CategoryDetailPage() {
   }
 
   return (
-    <div className={layoutClass.dashboardRoot}>
+    <PageOverlay className={layoutClass.dashboardRoot} busy={busy} error={error || null}>
       <div style={{ marginBottom: 8 }}>
         <Link to={`/${backQuery}`}>
           <Button>← Все категории</Button>
         </Link>
       </div>
-
-      {error ? <Alert type="error" message={error} showIcon style={{ marginBottom: 8 }} /> : null}
 
       <section className={layoutClass.dashboardSection} id="overview">
         <HeroSection meta={meta ?? null} kpis={data?.kpis ?? null} />
@@ -137,6 +140,6 @@ export function CategoryDetailPage() {
           )}
         </Card>
       </section>
-    </div>
+    </PageOverlay>
   );
 }

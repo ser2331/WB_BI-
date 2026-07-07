@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useClearImportMutation, useImportFileMutation } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
-import { Alert, Button, Card, Space, Typography, Upload } from 'antd';
+import { PageOverlay } from '@/components/ui/PageOverlay';
+import { Button, Card, Space, Typography, Upload } from 'antd';
 import type { UploadFile } from 'antd';
 
 export function ImportPage() {
@@ -52,17 +53,18 @@ export function ImportPage() {
   };
 
   return (
-    <div className={layoutClass.dashboardRoot}>
+    <PageOverlay
+      className={layoutClass.dashboardRoot}
+      busy={uploading}
+      busyText={importing ? 'Загрузка и обработка файла…' : 'Удаление данных…'}
+      error={error}
+      success={success}
+    >
       <Card title="Импорт данных">
         <Typography.Paragraph type="secondary">
           Загрузите CSV или JSON. JSON в формате dash_2 (с полем blocks) загружается напрямую. CSV —
           плоский список товаров с колонками nm, subject, brand, orders, sales, stock и др.
         </Typography.Paragraph>
-
-        {error ? <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} /> : null}
-        {success ? (
-          <Alert type="success" message={success} showIcon style={{ marginBottom: 16 }} />
-        ) : null}
 
         <Upload.Dragger
           accept=".csv,.json,text/csv,application/json"
@@ -116,6 +118,6 @@ export function ImportPage() {
           periodKey, periodLabel, photo, wbUrl.
         </Typography.Paragraph>
       </Card>
-    </div>
+    </PageOverlay>
   );
 }

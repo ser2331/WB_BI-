@@ -4,7 +4,7 @@ import { getErrorMessage } from '@/api/error';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/store/hooks';
 import { setCredentials } from '@/store/authSlice';
-import { Alert, Button, Card, Flex, Form, Input, Typography } from 'antd';
+import { Button, Card, Flex, Form, Input, Typography } from 'antd';
 
 export function LoginPage() {
   const dispatch = useAppDispatch();
@@ -77,13 +77,6 @@ export function LoginPage() {
             </Button>
           </Form.Item>
         </Form>
-
-        <Alert
-          type="info"
-          showIcon
-          style={{ marginTop: 16 }}
-          message="Учётные записи задаются в переменных окружения бэкенда"
-        />
       </Card>
     </Flex>
   );

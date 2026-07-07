@@ -21,6 +21,8 @@ export function useDashboardParams(defaultPageSize = 15) {
       search: params.search || undefined,
       page: params.page,
       pageSize: params.pageSize,
+      sortBy: params.sortBy,
+      sortDir: params.sortDir,
     }),
     [params]
   );
@@ -37,6 +39,8 @@ export function useDashboardParams(defaultPageSize = 15) {
       if (patch.brand !== undefined) apply('brand', patch.brand);
       if (patch.search !== undefined) apply('search', patch.search);
       if (patch.pageSize !== undefined) apply('pageSize', String(patch.pageSize));
+      if (patch.sortBy !== undefined) apply('sortBy', patch.sortBy);
+      if (patch.sortDir !== undefined) apply('sortDir', patch.sortDir);
       if (resetPage) next.set('page', '1');
       else if (patch.page !== undefined) {
         if (patch.page <= 1) next.delete('page');

@@ -13,6 +13,12 @@ const CategoryDetailPage = lazy(() =>
 const ImportPage = lazy(() =>
   import('@/pages/ImportPage').then((m) => ({ default: m.ImportPage }))
 );
+const AnalyticsPage = lazy(() =>
+  import('@/pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage }))
+);
+const DataTablePage = lazy(() =>
+  import('@/pages/DataTablePage').then((m) => ({ default: m.DataTablePage }))
+);
 const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 
 function routerBasename(): string | undefined {
@@ -40,6 +46,22 @@ export function App() {
               element={
                 <Suspense fallback={<RouteFallback />}>
                   <CategoriesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <Suspense fallback={<RouteFallback />}>
+                  <AnalyticsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/data"
+              element={
+                <Suspense fallback={<RouteFallback />}>
+                  <DataTablePage />
                 </Suspense>
               }
             />
