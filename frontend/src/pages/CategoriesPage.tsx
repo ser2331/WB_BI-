@@ -10,24 +10,10 @@ import {
 import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { HeroSection } from '@/components/dashboard/HeroSection';
-import {
-  Card,
-  CategoryCard,
-  CategoryCardButton,
-  CategoryCardMeta,
-  CategoryCardTitle,
-  CategoriesStack,
-  DashboardRoot,
-  DashboardSection,
-  EmptyState,
-  ErrorMsg,
-  FetchingHint,
-  LoadingState,
-  SectionHeader,
-  Skeleton,
-} from '@/components/dashboard/dashboard.styles';
-import { Button, PageScroll } from '@/components/layout/Layout.styles';
+import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { fmtNum } from '@/utils/format';
+import { Alert, Button, Card, Empty, Space, Typography } from 'antd';
 
 export function CategoriesPage() {
   const navigate = useNavigate();
@@ -45,7 +31,6 @@ export function CategoriesPage() {
   const {
     data,
     isLoading: categoriesLoading,
-    isFetching: categoriesFetching,
     error: categoriesError,
   } = useGetCategoriesQuery(apiQuery, { skip: !hasData });
 
@@ -64,50 +49,44 @@ export function CategoriesPage() {
 
   if (loading) {
     return (
-      <PageScroll>
-        <LoadingState>
-          <span>Загрузка…</span>
-          <Skeleton $h={120} />
-          <Skeleton $h={80} />
-        </LoadingState>
-      </PageScroll>
+      <div className={layoutClass.dashboardRoot}>
+        <DashboardPageSkeleton variant="categories" />
+      </div>
     );
   }
 
   if (!hasData) {
     return (
-      <PageScroll>
-        {error && <ErrorMsg>{error}</ErrorMsg>}
+      <div className={layoutClass.dashboardRoot}>
+        {error ? (
+          <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />
+        ) : null}
         <Card>
-          <EmptyState>
-            <p style={{ marginBottom: 16, fontSize: 16 }}>Данные ещё не загружены</p>
+          <Empty description="Данные ещё не загружены">
             {isAdmin ? (
               <Link to="/import">
-                <Button $variant="primary" as="span">
-                  Перейти к импорту
-                </Button>
+                <Button type="primary">Перейти к импорту</Button>
               </Link>
             ) : (
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>
+              <Typography.Text type="secondary">
                 Обратитесь к администратору для загрузки данных
-              </p>
+              </Typography.Text>
             )}
-          </EmptyState>
+          </Empty>
         </Card>
-      </PageScroll>
+      </div>
     );
   }
 
   return (
-    <DashboardRoot>
-      {error && <ErrorMsg>{error}</ErrorMsg>}
-      {categoriesFetching && !categoriesLoading && <FetchingHint>Обновление…</FetchingHint>}
+    <div className={layoutClass.dashboardRoot}>
+      {error ? <Alert type="error" message={error} showIcon style={{ marginBottom: 8 }} /> : null}
 
-      <DashboardSection id="overview">
+      <section className={layoutClass.dashboardSection} id="overview">
         <HeroSection meta={meta ?? null} kpis={data?.kpis ?? null} />
-      </DashboardSection>
+      </section>
 
-      <DashboardSection id="filters">
+      <section className={layoutClass.dashboardSection} id="filters">
         <DashboardFilters
           title="Фильтры"
           options={filterOptions ?? null}
@@ -132,7 +111,6 @@ export function CategoriesPage() {
             data
               ? {
                   page: data.page,
-                  totalPages: data.total_pages,
                   from: data.from_index,
                   to: data.to_index,
                   total: data.total,
@@ -144,41 +122,41 @@ export function CategoriesPage() {
               : null
           }
         />
-      </DashboardSection>
+      </section>
 
-      <DashboardSection id="categories">
-        <Card>
-          <SectionHeader>
-            <h2>Категории ({data?.total ?? 0})</h2>
-          </SectionHeader>
-
+      <section className={layoutClass.dashboardSection} id="categories">
+        <Card title={`Категории (${data?.total ?? 0})`}>
           {!data?.items.length ? (
-            <EmptyState>По фильтрам категории не найдены</EmptyState>
+            <Empty description="По фильтрам категории не найдены" />
           ) : (
-            <CategoriesStack>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
               {data.items.map((cat) => (
-                <CategoryCardButton
+                <Card
                   key={cat.subject}
-                  type="button"
+                  hoverable
+                  size="small"
                   onClick={() => openCategory(cat.subject)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  <CategoryCard>
-                    <CategoryCardTitle>{cat.subject}</CategoryCardTitle>
-                    <CategoryCardMeta>
-                      {fmtNum(cat.glues)} склеек · {fmtNum(cat.sku)} SKU · заказы{' '}
-                      {fmtNum(cat.orders)} · остаток {cat.stock != null ? fmtNum(cat.stock) : '—'}
-                    </CategoryCardMeta>
-                  </CategoryCard>
-                </CategoryCardButton>
+                  <Typography.Text strong style={{ fontSize: 16 }}>
+                    {cat.subject}
+                  </Typography.Text>
+                  <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0' }}>
+                    {fmtNum(cat.glues)} склеек · {fmtNum(cat.sku)} SKU · заказы {fmtNum(cat.orders)}{' '}
+                    · остаток {cat.stock != null ? fmtNum(cat.stock) : '—'}
+                  </Typography.Paragraph>
+                </Card>
               ))}
-            </CategoriesStack>
+            </Space>
           )}
         </Card>
-      </DashboardSection>
+      </section>
 
-      {meta?.limits && (
-        <p style={{ color: 'var(--color-text-muted)', fontSize: 13 }}>{meta.limits}</p>
-      )}
-    </DashboardRoot>
+      {meta?.limits ? (
+        <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+          {meta.limits}
+        </Typography.Text>
+      ) : null}
+    </div>
   );
 }

@@ -1,49 +1,10 @@
-import { type FormEvent, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import { useLoginMutation } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
-import { Card, ErrorMsg, Field } from '@/components/dashboard/dashboard.styles';
-import { Button } from '@/components/layout/Layout.styles';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppDispatch } from '@/store/hooks';
 import { setCredentials } from '@/store/authSlice';
-
-const LoginShell = styled.div`
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: var(--color-bg);
-`;
-
-const LoginCard = styled(Card)`
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-`;
-
-const Subtitle = styled.p`
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  line-height: 1.5;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
+import { Alert, Button, Card, Flex, Form, Input, Typography } from 'antd';
 
 export function LoginPage() {
   const dispatch = useAppDispatch();
@@ -51,10 +12,7 @@ export function LoginPage() {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [login, { isLoading }] = useLoginMutation();
-
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [form] = Form.useForm();
 
   const state = location.state as { from?: string } | null;
   const from = state?.from && state.from !== '/login' ? state.from : '/';
@@ -63,12 +21,12 @@ export function LoginPage() {
     return <Navigate to={from} replace />;
   }
 
-  const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError('');
-
+  const onFinish = async (values: { username: string; password: string }) => {
     try {
-      const result = await login({ username: username.trim(), password }).unwrap();
+      const result = await login({
+        username: values.username.trim(),
+        password: values.password,
+      }).unwrap();
       dispatch(
         setCredentials({
           token: result.access_token,
@@ -77,48 +35,56 @@ export function LoginPage() {
       );
       void navigate(from, { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, 'Не удалось войти'));
+      form.setFields([
+        {
+          name: 'password',
+          errors: [getErrorMessage(err, 'Не удалось войти')],
+        },
+      ]);
     }
   };
 
   return (
-    <LoginShell>
-      <LoginCard>
-        <div>
-          <Title>WB BI</Title>
-          <Subtitle>Войдите как администратор или пользователь</Subtitle>
-        </div>
+    <Flex align="center" justify="center" style={{ minHeight: '100dvh', padding: 24 }}>
+      <Card style={{ width: '100%', maxWidth: 400 }}>
+        <Typography.Title level={3} style={{ marginTop: 0 }}>
+          WB BI
+        </Typography.Title>
+        <Typography.Paragraph type="secondary">
+          Войдите как администратор или пользователь
+        </Typography.Paragraph>
 
-        {error && <ErrorMsg>{error}</ErrorMsg>}
+        <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+          <Form.Item
+            label="Логин"
+            name="username"
+            rules={[{ required: true, message: 'Введите логин' }]}
+          >
+            <Input autoComplete="username" size="large" />
+          </Form.Item>
 
-        <Form onSubmit={onSubmit}>
-          <Field>
-            Логин
-            <input
-              type="text"
-              name="username"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </Field>
-          <Field>
-            Пароль
-            <input
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </Field>
-          <Button type="submit" $variant="primary" $fullWidth disabled={isLoading}>
-            {isLoading ? 'Вход…' : 'Войти'}
-          </Button>
+          <Form.Item
+            label="Пароль"
+            name="password"
+            rules={[{ required: true, message: 'Введите пароль' }]}
+          >
+            <Input.Password autoComplete="current-password" size="large" />
+          </Form.Item>
+
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button type="primary" htmlType="submit" block size="large" loading={isLoading}>
+              Войти
+            </Button>
+          </Form.Item>
         </Form>
-      </LoginCard>
-    </LoginShell>
+
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginTop: 16 }}
+          message="Учётные записи задаются в переменных окружения бэкенда"
+        />
+      </Card>
+    </Flex>
   );
 }

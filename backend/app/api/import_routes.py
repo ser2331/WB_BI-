@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-from app.api.deps import get_current_user, require_admin
+from app.api.deps import require_admin
 from app.schemas.auth import AuthUser
 from app.schemas.dashboard_data import ImportResponse
-from app.services.dataset_memory import clear_dataset, get_dataset, save_dataset
+from app.services.dataset_memory import clear_dataset, save_dataset
 from app.services.file_import import parse_upload
 from app.services.photo_resolver import clear_photo_cache
 
@@ -45,19 +45,6 @@ async def import_file(
         blocks_count=len(dataset.blocks),
         products_count=products_count,
     )
-
-
-@router.get("/import/status")
-async def import_status(_: AuthUser = Depends(get_current_user)):
-    dataset = get_dataset()
-    if not dataset:
-        return {"has_data": False}
-    return {
-        "has_data": True,
-        "file_name": dataset.fileName,
-        "blocks_count": len(dataset.blocks),
-        "categories_count": len({b.subject for b in dataset.blocks}),
-    }
 
 
 @router.delete("/import")

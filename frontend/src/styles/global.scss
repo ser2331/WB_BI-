@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme='dark'] {
   --color-bg: #0f1117;
   --color-bg-secondary: #1a1d27;
   --color-bg-card: #222633;
@@ -14,6 +15,22 @@
   --radius: 12px;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   --font: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+[data-theme='light'] {
+  --color-bg: #f0f2f5;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-border: #e2e5ec;
+  --color-text: #1a1d27;
+  --color-text-muted: #5c6478;
+  --color-primary: #7c5cfc;
+  --color-primary-hover: #6a4ae8;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-accent: #0284c7;
+  --shadow: 0 4px 24px rgba(15, 17, 23, 0.08);
 }
 
 *,
@@ -45,19 +62,6 @@ a {
   text-decoration: none;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: inherit;
-}
-
-input,
-select {
-  font-family: inherit;
-}
-
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -75,4 +79,12 @@ select {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
+}
+
+.ant-layout-sider .ant-menu-item a {
+  color: inherit;
+}
+
+.ant-layout-sider .ant-menu-item-selected a {
+  color: inherit;
 }

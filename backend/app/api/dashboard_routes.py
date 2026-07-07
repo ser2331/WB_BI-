@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_current_user
 from app.schemas.dashboard_api import (
-    DashboardKpis,
     DashboardMeta,
     FilterOptions,
     PaginatedBlocks,
@@ -77,13 +76,6 @@ async def dashboard_filters():
         subjects=dataset.subjects,
         brands=dataset.brands,
     )
-
-
-@router.get("/kpis", response_model=DashboardKpis)
-async def dashboard_kpis(filters: QueryFilters = Depends(_parse_filters)):
-    dataset = _require_dataset()
-    blocks = filter_blocks(dataset.blocks, filters)
-    return compute_kpis(blocks, dataset)
 
 
 @router.get("/categories", response_model=PaginatedCategories)

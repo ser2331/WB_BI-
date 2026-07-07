@@ -1,18 +1,7 @@
 import { memo, useCallback } from 'react';
 import type { FilterOptions } from '@/types/dashboardApi';
-import { Button } from '@/components/layout/Layout.styles';
-import {
-  Field,
-  FilterResetButton,
-  FilterResetRow,
-  FiltersPanel,
-  FiltersToolbarFooter,
-  PageInfo,
-  PageSizeField,
-  PaginationControls,
-  StickyFiltersShell,
-  ToolbarTitle,
-} from './dashboard.styles';
+import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { Button, Card, Col, Input, Pagination, Row, Select, Space, Typography } from 'antd';
 
 export interface FiltersState {
   periodKey: string;
@@ -23,7 +12,6 @@ export interface FiltersState {
 
 export interface PagingConfig {
   page: number;
-  totalPages: number;
   from: number;
   to: number;
   total: number;
@@ -56,109 +44,121 @@ export const DashboardFilters = memo(function DashboardFilters({
   );
 
   const hasActive = filters.periodKey || filters.subject || filters.brand || filters.search;
-
   const showPaging = paging && paging.total > 0;
 
   return (
-    <StickyFiltersShell>
-      <FiltersPanel>
-        {title ? <ToolbarTitle>{title}</ToolbarTitle> : null}
-
-        <Field>
-          Период
-          <select value={filters.periodKey} onChange={(e) => set({ periodKey: e.target.value })}>
-            <option value="">Все периоды</option>
-            {(options?.periods ?? []).map((p) => (
-              <option key={p.key} value={p.key}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-        {showSubject && (
-          <Field>
-            Предмет
-            <select value={filters.subject} onChange={(e) => set({ subject: e.target.value })}>
-              <option value="">Все предметы</option>
-              {(options?.subjects ?? []).map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
-        <Field>
-          Бренд
-          <select value={filters.brand} onChange={(e) => set({ brand: e.target.value })}>
-            <option value="">Все бренды</option>
-            {(options?.brands ?? []).map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field>
-          Поиск
-          <input
-            type="search"
-            placeholder="SKU, артикул, название…"
-            value={filters.search}
-            onChange={(e) => set({ search: e.target.value })}
-          />
-        </Field>
-        {hasActive ? (
-          <FilterResetRow>
-            <FilterResetButton
-              type="button"
-              onClick={() => onChange({ periodKey: '', subject: '', brand: '', search: '' })}
-            >
-              Сбросить фильтры
-            </FilterResetButton>
-          </FilterResetRow>
+    <div className={layoutClass.stickyFilters}>
+      <Card>
+        {title ? (
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            {title}
+          </Typography.Title>
         ) : null}
+
+        <Row gutter={[12, 12]}>
+          <Col xs={24} sm={12} lg={6}>
+            <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 6 }}>
+              Период
+            </Typography.Text>
+            <Select
+              style={{ width: '100%' }}
+              value={filters.periodKey || undefined}
+              placeholder="Все периоды"
+              allowClear
+              onChange={(value) => set({ periodKey: value ?? '' })}
+              options={(options?.periods ?? []).map((p) => ({ value: p.key, label: p.label }))}
+            />
+          </Col>
+
+          {showSubject ? (
+            <Col xs={24} sm={12} lg={6}>
+              <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 6 }}>
+                Предмет
+              </Typography.Text>
+              <Select
+                style={{ width: '100%' }}
+                value={filters.subject || undefined}
+                placeholder="Все предметы"
+                allowClear
+                showSearch
+                optionFilterProp="label"
+                onChange={(value) => set({ subject: value ?? '' })}
+                options={(options?.subjects ?? []).map((s) => ({ value: s, label: s }))}
+              />
+            </Col>
+          ) : null}
+
+          <Col xs={24} sm={12} lg={6}>
+            <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 6 }}>
+              Бренд
+            </Typography.Text>
+            <Select
+              style={{ width: '100%' }}
+              value={filters.brand || undefined}
+              placeholder="Все бренды"
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              onChange={(value) => set({ brand: value ?? '' })}
+              options={(options?.brands ?? []).map((b) => ({ value: b, label: b }))}
+            />
+          </Col>
+
+          <Col xs={24} sm={12} lg={6}>
+            <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 6 }}>
+              Поиск
+            </Typography.Text>
+            <Input.Search
+              allowClear
+              placeholder="SKU, артикул, название…"
+              value={filters.search}
+              onChange={(e) => set({ search: e.target.value })}
+            />
+          </Col>
+
+          {hasActive ? (
+            <Col span={24}>
+              <Button type="link" onClick={() => onChange({ periodKey: '', subject: '', brand: '', search: '' })}>
+                Сбросить фильтры
+              </Button>
+            </Col>
+          ) : null}
+        </Row>
 
         {showPaging && paging ? (
-          <FiltersToolbarFooter>
-            <PageSizeField>
-              На странице
-              <select
+          <Space
+            wrap
+            style={{
+              width: '100%',
+              marginTop: 16,
+              paddingTop: 16,
+              borderTop: '1px solid var(--color-border)',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Space wrap>
+              <Typography.Text type="secondary">На странице</Typography.Text>
+              <Select
                 value={paging.pageSize}
-                onChange={(e) => paging.onPageSizeChange(Number(e.target.value))}
-              >
-                {paging.pageSizeOptions.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </PageSizeField>
-            <PaginationControls>
-              <PageInfo>
+                style={{ width: 88 }}
+                onChange={paging.onPageSizeChange}
+                options={paging.pageSizeOptions.map((n) => ({ value: n, label: String(n) }))}
+              />
+              <Typography.Text type="secondary">
                 {paging.from}–{paging.to} / {paging.total}
-              </PageInfo>
-              <div className="pagination-actions">
-                <Button
-                  disabled={paging.page <= 1}
-                  onClick={() => paging.onPageChange(paging.page - 1)}
-                >
-                  ←
-                </Button>
-                <span className="page-num">
-                  {paging.page}/{paging.totalPages}
-                </span>
-                <Button
-                  disabled={paging.page >= paging.totalPages}
-                  onClick={() => paging.onPageChange(paging.page + 1)}
-                >
-                  →
-                </Button>
-              </div>
-            </PaginationControls>
-          </FiltersToolbarFooter>
+              </Typography.Text>
+            </Space>
+
+            <Pagination
+              current={paging.page}
+              total={paging.total}
+              pageSize={paging.pageSize}
+              showSizeChanger={false}
+              onChange={paging.onPageChange}
+            />
+          </Space>
         ) : null}
-      </FiltersPanel>
-    </StickyFiltersShell>
+      </Card>
+    </div>
   );
 });

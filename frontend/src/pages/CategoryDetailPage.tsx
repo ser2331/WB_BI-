@@ -11,19 +11,9 @@ import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { GlueBlocksList } from '@/components/dashboard/GlueBlock';
 import { HeroSection } from '@/components/dashboard/HeroSection';
-import {
-  BlocksGrid,
-  Card,
-  DashboardRoot,
-  DashboardSection,
-  EmptyState,
-  ErrorMsg,
-  FetchingHint,
-  LoadingState,
-  SectionHeader,
-  Skeleton,
-} from '@/components/dashboard/dashboard.styles';
-import { Button, PageScroll } from '@/components/layout/Layout.styles';
+import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
+import { Alert, Button, Card, Empty, Space } from 'antd';
 
 export function CategoryDetailPage() {
   const { subject: subjectParam } = useParams<{ subject: string }>();
@@ -54,7 +44,6 @@ export function CategoryDetailPage() {
   const {
     data,
     isLoading: blocksLoading,
-    isFetching: blocksFetching,
     error: blocksError,
   } = useGetCategoryBlocksQuery(blocksQuery, { skip: !subject });
 
@@ -71,40 +60,35 @@ export function CategoryDetailPage() {
 
   if (!subject) {
     return (
-      <PageScroll>
-        <ErrorMsg>Категория не указана</ErrorMsg>
-      </PageScroll>
+      <div className={layoutClass.dashboardRoot}>
+        <Alert type="error" message="Категория не указана" showIcon />
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <PageScroll>
-        <LoadingState>
-          <span>Загрузка категории…</span>
-          <Skeleton $h={120} />
-          <Skeleton $h={200} />
-        </LoadingState>
-      </PageScroll>
+      <div className={layoutClass.dashboardRoot}>
+        <DashboardPageSkeleton variant="category-detail" />
+      </div>
     );
   }
 
   return (
-    <DashboardRoot>
-      <div style={{ marginBottom: 12 }}>
+    <div className={layoutClass.dashboardRoot}>
+      <div style={{ marginBottom: 8 }}>
         <Link to={`/${backQuery}`}>
-          <Button as="span">← Все категории</Button>
+          <Button>← Все категории</Button>
         </Link>
       </div>
 
-      {error && <ErrorMsg>{error}</ErrorMsg>}
-      {blocksFetching && !blocksLoading && <FetchingHint>Обновление…</FetchingHint>}
+      {error ? <Alert type="error" message={error} showIcon style={{ marginBottom: 8 }} /> : null}
 
-      <DashboardSection id="overview">
+      <section className={layoutClass.dashboardSection} id="overview">
         <HeroSection meta={meta ?? null} kpis={data?.kpis ?? null} />
-      </DashboardSection>
+      </section>
 
-      <DashboardSection id="filters">
+      <section className={layoutClass.dashboardSection} id="filters">
         <DashboardFilters
           title={subject}
           options={filterOptions ?? null}
@@ -129,7 +113,6 @@ export function CategoryDetailPage() {
             data
               ? {
                   page: data.page,
-                  totalPages: data.total_pages,
                   from: data.from_index,
                   to: data.to_index,
                   total: data.total,
@@ -141,23 +124,19 @@ export function CategoryDetailPage() {
               : null
           }
         />
-      </DashboardSection>
+      </section>
 
-      <DashboardSection id="blocks">
-        <Card>
-          <SectionHeader>
-            <h2>Склейки ({data?.total ?? 0})</h2>
-          </SectionHeader>
-
+      <section className={layoutClass.dashboardSection} id="blocks">
+        <Card title={`Склейки (${data?.total ?? 0})`}>
           {!data?.items.length ? (
-            <EmptyState>По фильтрам склеек не найдено</EmptyState>
+            <Empty description="По фильтрам склеек не найдено" />
           ) : (
-            <BlocksGrid>
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <GlueBlocksList blocks={data.items} />
-            </BlocksGrid>
+            </Space>
           )}
         </Card>
-      </DashboardSection>
-    </DashboardRoot>
+      </section>
+    </div>
   );
 }

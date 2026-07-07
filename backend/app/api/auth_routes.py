@@ -9,7 +9,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/login", response_model=LoginResponse)
 async def login(body: LoginRequest):
-    user = authenticate_user(body.username, body.password)
+    user = authenticate_user(body.username.strip(), body.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -1,0 +1,110 @@
+.dashboard-root {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 32px;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-root {
+    padding: 16px;
+    padding-bottom: calc(16px + 68px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.dashboard-section {
+  scroll-margin-top: 120px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-section {
+    scroll-margin-top: 100px;
+  }
+}
+
+.sticky-filters {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  background: var(--color-bg);
+}
+
+.products-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 8px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 768px) {
+  .products-row {
+    gap: 10px;
+  }
+}
+
+.scroll-hint {
+  padding: 0 2px 8px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .scroll-hint {
+    text-align: center;
+  }
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+    padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+}
+
+.mobile-bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  min-height: 52px;
+}
+
+.mobile-bottom-nav-item--active {
+  color: var(--color-primary);
+  background: rgba(124, 92, 252, 0.12);
+}

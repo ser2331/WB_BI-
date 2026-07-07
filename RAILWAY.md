@@ -72,11 +72,14 @@ CORS_ORIGINS=https://ser2331.github.io,http://localhost:5173
 CORS_ORIGIN_REGEX=https://([a-zA-Z0-9-]+\.)?github\.io
 JWT_SECRET=замени-на-длинную-случайную-строку
 JWT_EXPIRE_MINUTES=10080
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=надёжный-пароль
+ADMIN_USERNAME=superuser
+ADMIN_PASSWORD=123456789
 USER_USERNAME=user
 USER_PASSWORD=надёжный-пароль
 ```
+
+> **Важно:** в Raw Editor **без кавычек** вокруг значений (`ADMIN_PASSWORD=123456789`, не `ADMIN_PASSWORD="123456789"`).  
+> Бэкенд теперь снимает лишние кавычки, но проще задавать значения без них.
 
 > **CORS:** без `CORS_ORIGINS` фронт на GitHub Pages получит `Failed to fetch`.  
 > Origin всегда `https://ser2331.github.io` (без `/WB_BI/`).  

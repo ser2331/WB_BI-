@@ -1,41 +1,23 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
+import { InboxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useClearImportMutation, useImportFileMutation } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
-import {
-  Card,
-  DropZone,
-  ErrorMsg,
-  ImportActions,
-  SectionHeader,
-  SuccessMsg,
-} from '@/components/dashboard/dashboard.styles';
-import { Button, PageScroll } from '@/components/layout/Layout.styles';
+import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { Alert, Button, Card, Space, Typography, Upload } from 'antd';
+import type { UploadFile } from 'antd';
 
 export function ImportPage() {
   const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const [importFile, { isLoading: importing }] = useImportFileMutation();
   const [clearImport, { isLoading: clearing }] = useClearImportMutation();
   const uploading = importing || clearing;
 
-  const acceptFile = (file: File | null) => {
-    if (!file) return;
-    const lower = file.name.toLowerCase();
-    if (!lower.endsWith('.csv') && !lower.endsWith('.json')) {
-      setError('Поддерживаются только файлы .csv и .json');
-      setSelectedFile(null);
-      return;
-    }
-    setError(null);
-    setSuccess(null);
-    setSelectedFile(file);
-  };
+  const selectedFile = fileList[0]?.originFileObj ?? null;
 
   const handleUpload = async () => {
     if (!selectedFile) {
@@ -62,7 +44,7 @@ export function ImportPage() {
     setSuccess(null);
     try {
       await clearImport().unwrap();
-      setSelectedFile(null);
+      setFileList([]);
       setSuccess('Загруженные данные удалены');
     } catch (e) {
       setError(getErrorMessage(e, 'Ошибка удаления'));
@@ -70,63 +52,70 @@ export function ImportPage() {
   };
 
   return (
-    <PageScroll>
-      <Card>
-        <SectionHeader>
-          <h1 style={{ fontSize: 24 }}>Импорт данных</h1>
-        </SectionHeader>
-        <p style={{ color: 'var(--color-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
+    <div className={layoutClass.dashboardRoot}>
+      <Card title="Импорт данных">
+        <Typography.Paragraph type="secondary">
           Загрузите CSV или JSON. JSON в формате dash_2 (с полем blocks) загружается напрямую. CSV —
           плоский список товаров с колонками nm, subject, brand, orders, sales, stock и др.
-        </p>
+        </Typography.Paragraph>
 
-        {error && <ErrorMsg>{error}</ErrorMsg>}
-        {success && <SuccessMsg>{success}</SuccessMsg>}
+        {error ? <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} /> : null}
+        {success ? (
+          <Alert type="success" message={success} showIcon style={{ marginBottom: 16 }} />
+        ) : null}
 
-        <DropZone
-          $active={dragging}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
+        <Upload.Dragger
+          accept=".csv,.json,text/csv,application/json"
+          maxCount={1}
+          fileList={fileList}
+          beforeUpload={(file) => {
+            const lower = file.name.toLowerCase();
+            if (!lower.endsWith('.csv') && !lower.endsWith('.json')) {
+              setError('Поддерживаются только файлы .csv и .json');
+              return Upload.LIST_IGNORE;
+            }
+            setError(null);
+            setSuccess(null);
+            setFileList([
+              {
+                uid: file.uid,
+                name: file.name,
+                status: 'done',
+                originFileObj: file,
+              },
+            ]);
+            return false;
           }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            acceptFile(e.dataTransfer.files[0] ?? null);
+          onRemove={() => {
+            setFileList([]);
+            return true;
           }}
+          disabled={uploading}
         >
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".csv,.json,text/csv,application/json"
-            onChange={(e) => acceptFile(e.target.files?.[0] ?? null)}
-          />
-          <strong>{selectedFile ? selectedFile.name : 'Перетащите файл сюда'}</strong>
-          <span>или нажмите для выбора · CSV, JSON · до нескольких мегабайт</span>
-        </DropZone>
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">Перетащите файл сюда или нажмите для выбора</p>
+          <p className="ant-upload-hint">CSV, JSON · до нескольких мегабайт</p>
+        </Upload.Dragger>
 
-        <ImportActions>
-          <Button $variant="primary" onClick={handleUpload} disabled={uploading || !selectedFile}>
-            {importing ? 'Загрузка…' : 'Загрузить и обработать'}
+        <Space wrap style={{ marginTop: 16 }}>
+          <Button type="primary" onClick={handleUpload} loading={importing} disabled={!selectedFile}>
+            Загрузить и обработать
           </Button>
-          <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
-            Выбрать файл
+          <Button danger onClick={handleClear} loading={clearing}>
+            Очистить данные
           </Button>
-          <Button onClick={handleClear} disabled={uploading}>
-            {clearing ? 'Удаление…' : 'Очистить данные'}
-          </Button>
-        </ImportActions>
+        </Space>
       </Card>
 
-      <Card>
-        <h2 style={{ fontSize: 18, marginBottom: 12 }}>Формат CSV</h2>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: 14, lineHeight: 1.6 }}>
-          Минимум: колонка <code>nm</code> (артикул WB). Рекомендуемые: subject, brand, vendorCode,
-          orders, sales, stock, spp, kvv, ad_ctr, title, groupKey, periodKey, periodLabel, photo,
-          wbUrl.
-        </p>
+      <Card title="Формат CSV">
+        <Typography.Paragraph type="secondary">
+          Минимум: колонка <Typography.Text code>nm</Typography.Text> (артикул WB). Рекомендуемые:
+          subject, brand, vendorCode, orders, sales, stock, spp, kvv, ad_ctr, title, groupKey,
+          periodKey, periodLabel, photo, wbUrl.
+        </Typography.Paragraph>
       </Card>
-    </PageScroll>
+    </div>
   );
 }

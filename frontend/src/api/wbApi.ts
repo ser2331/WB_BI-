@@ -29,8 +29,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   return result;
 };
 
-export type CategoriesQueryArgs = DashboardQueryParams;
-
 export type CategoryBlocksQueryArgs = Omit<DashboardQueryParams, 'subject'> & {
   subject: string;
 };
@@ -46,7 +44,7 @@ function buildParams(params: Record<string, string | number | undefined>): Recor
 export const wbApi = createApi({
   reducerPath: 'wbApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Dashboard', 'Auth'],
+  tagTypes: ['Dashboard'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({
@@ -58,7 +56,6 @@ export const wbApi = createApi({
 
     getMe: builder.query<AuthUser, void>({
       query: () => '/auth/me',
-      providesTags: ['Auth'],
     }),
 
     getDashboardMeta: builder.query<DashboardMeta, void>({
@@ -71,7 +68,7 @@ export const wbApi = createApi({
       providesTags: ['Dashboard'],
     }),
 
-    getCategories: builder.query<PaginatedCategories, CategoriesQueryArgs>({
+    getCategories: builder.query<PaginatedCategories, DashboardQueryParams>({
       query: (params) => ({
         url: '/dashboard/categories',
         params: buildParams({

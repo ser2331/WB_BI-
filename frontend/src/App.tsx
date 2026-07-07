@@ -2,8 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { RequireAdmin, RequireAuth } from '@/components/auth/RequireAuth';
 import { Layout } from '@/components/layout/Layout';
-import { PageScroll } from '@/components/layout/Layout.styles';
-import { LoadingState, Skeleton } from '@/components/dashboard/dashboard.styles';
+import { RouteFallback } from '@/components/ui/skeletons/PageSkeleton';
 
 const CategoriesPage = lazy(() =>
   import('@/pages/CategoriesPage').then((m) => ({ default: m.CategoriesPage }))
@@ -22,17 +21,6 @@ function routerBasename(): string | undefined {
   return base.replace(/\/$/, '');
 }
 
-function PageLoader() {
-  return (
-    <PageScroll>
-      <LoadingState>
-        <span>Загрузка…</span>
-        <Skeleton $h={80} />
-      </LoadingState>
-    </PageScroll>
-  );
-}
-
 export function App() {
   return (
     <BrowserRouter basename={routerBasename()}>
@@ -40,7 +28,7 @@ export function App() {
         <Route
           path="/login"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<RouteFallback />}>
               <LoginPage />
             </Suspense>
           }
@@ -50,7 +38,7 @@ export function App() {
             <Route
               path="/"
               element={
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={<RouteFallback />}>
                   <CategoriesPage />
                 </Suspense>
               }
@@ -58,7 +46,7 @@ export function App() {
             <Route
               path="/category/:subject"
               element={
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={<RouteFallback />}>
                   <CategoryDetailPage />
                 </Suspense>
               }
@@ -67,7 +55,7 @@ export function App() {
               <Route
                 path="/import"
                 element={
-                  <Suspense fallback={<PageLoader />}>
+                  <Suspense fallback={<RouteFallback />}>
                     <ImportPage />
                   </Suspense>
                 }

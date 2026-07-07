@@ -57,7 +57,7 @@ function basketHosts(vol: number): string[] {
 const IMAGE_SIZES = ['c516x688', 'big', 'c246x328', 'tm'] as const;
 const EXTENSIONS = ['webp', 'jpg'] as const;
 
-export function wbPhotoCandidates(nm: string | number): string[] {
+function wbPhotoCandidates(nm: string | number): string[] {
   const nmId = Number(nm);
   if (!nmId || Number.isNaN(nmId)) return [];
 
@@ -79,18 +79,6 @@ export function wbPhotoCandidates(nm: string | number): string[] {
   }
 
   return urls;
-}
-
-export function wbPhotoUrl(nm: string | number): string | null {
-  return wbPhotoCandidates(nm)[0] ?? null;
-}
-
-export function resolvePhotoUrl(photo: string | null | undefined, nm: string): string | null {
-  if (photo) {
-    const trimmed = photo.trim();
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  }
-  return wbPhotoUrl(nm);
 }
 
 export function allPhotoCandidates(photo: string | null | undefined, nm: string): string[] {

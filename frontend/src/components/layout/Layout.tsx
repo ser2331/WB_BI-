@@ -1,28 +1,31 @@
+import {
+  FolderOpenOutlined,
+  LogoutOutlined,
+  MoonOutlined,
+  SunOutlined,
+  TableOutlined,
+} from '@ant-design/icons';
+import { Button, Layout as AntLayout, Menu, Space, Switch, Tag, Typography, theme } from 'antd';
 import { NavLink as RouterNavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { wbApi } from '@/api/wbApi';
+import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { useAuth } from '@/hooks/useAuth';
+import { useThemeMode } from '@/hooks/useThemeMode';
 import { useAppDispatch } from '@/store/hooks';
 import { logout } from '@/store/authSlice';
-import {
-  AppShell,
-  Sidebar,
-  Logo,
-  Nav,
-  NavLink,
-  BottomNav,
-  BottomNavItem,
-  Main,
-  Header,
-  PageTitle,
-  Content,
-  HeaderActions,
-  UserBadge,
-  Button,
-} from './Layout.styles';
+import './layout.scss';
+
+const { Header, Sider, Content } = AntLayout;
 
 const allNavItems = [
-  { to: '/', label: 'Категории', icon: '📂', shortTitle: 'Категории', adminOnly: false },
-  { to: '/import', label: 'Импорт', icon: '📁', shortTitle: 'Импорт', adminOnly: true },
+  { key: '/', label: 'Категории', icon: <TableOutlined />, shortTitle: 'Категории', adminOnly: false },
+  {
+    key: '/import',
+    label: 'Импорт',
+    icon: <FolderOpenOutlined />,
+    shortTitle: 'Импорт',
+    adminOnly: true,
+  },
 ];
 
 const pageTitles: Record<string, string> = {
@@ -39,9 +42,14 @@ export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { token } = theme.useToken();
   const { user, isAdmin } = useAuth();
+  const { isDark, setMode } = useThemeMode();
 
   const navItems = allNavItems.filter((item) => !item.adminOnly || isAdmin);
+  const selectedKey = navItems.find((item) =>
+    item.key === '/' ? location.pathname === '/' : location.pathname.startsWith(item.key)
+  )?.key;
 
   const pageTitle = location.pathname.startsWith('/category/')
     ? decodeURIComponent(location.pathname.replace('/category/', ''))
@@ -54,55 +62,76 @@ export function Layout() {
   };
 
   return (
-    <AppShell>
-      <Sidebar>
-        <Logo>
+    <AntLayout className="app-shell">
+      <Sider width={240} theme={isDark ? 'dark' : 'light'} className="desktop-sider">
+        <div className="logo">
           <span>WB BI</span>
-        </Logo>
-        <Nav>
-          {navItems.map((item) => (
-            <RouterNavLink key={item.to} to={item.to} end={item.to === '/'}>
-              {({ isActive }) => (
-                <NavLink as="span" $active={isActive}>
-                  {item.icon} {item.label}
-                </NavLink>
-              )}
-            </RouterNavLink>
-          ))}
-        </Nav>
-      </Sidebar>
+        </div>
+        <Menu
+          mode="inline"
+          selectedKeys={selectedKey ? [selectedKey] : []}
+          onClick={({ key }) => void navigate(key)}
+          items={navItems.map((item) => ({
+            key: item.key,
+            icon: item.icon,
+            label: item.label,
+          }))}
+          style={{ borderInlineEnd: 0, background: 'transparent' }}
+        />
+      </Sider>
 
-      <Main>
-        <Header>
-          <PageTitle>{pageTitle}</PageTitle>
-          <HeaderActions>
-            {user && (
-              <UserBadge>
-                <strong>{user.username}</strong> · {roleLabels[user.role]}
-              </UserBadge>
-            )}
-            <Button type="button" onClick={handleLogout}>
+      <AntLayout>
+        <Header className="app-header" style={{ background: token.colorBgContainer }}>
+          <Typography.Title level={4} style={{ margin: 0, fontSize: 'clamp(17px, 2vw, 22px)' }}>
+            {pageTitle}
+          </Typography.Title>
+
+          <Space wrap align="center">
+            <Space size={8}>
+              <SunOutlined style={{ color: isDark ? token.colorTextSecondary : token.colorPrimary }} />
+              <Switch
+                checked={isDark}
+                onChange={(checked) => setMode(checked ? 'dark' : 'light')}
+                checkedChildren={<MoonOutlined />}
+                unCheckedChildren={<SunOutlined />}
+                aria-label="Переключить тему"
+              />
+              <MoonOutlined style={{ color: isDark ? token.colorPrimary : token.colorTextSecondary }} />
+            </Space>
+
+            {user ? (
+              <Tag color="processing">
+                {user.username} · {roleLabels[user.role]}
+              </Tag>
+            ) : null}
+
+            <Button icon={<LogoutOutlined />} onClick={handleLogout}>
               Выйти
             </Button>
-          </HeaderActions>
+          </Space>
         </Header>
-        <Content>
+
+        <Content className="main-content">
           <Outlet />
         </Content>
-      </Main>
+      </AntLayout>
 
-      <BottomNav>
+      <nav className={layoutClass.mobileBottomNav}>
         {navItems.map((item) => (
-          <RouterNavLink key={item.to} to={item.to} end={item.to === '/'}>
+          <RouterNavLink key={item.key} to={item.key} end={item.key === '/'} style={{ flex: 1 }}>
             {({ isActive }) => (
-              <BottomNavItem as="span" $active={isActive}>
-                <span>{item.icon}</span>
+              <span
+                className={
+                  isActive ? layoutClass.mobileBottomNavItemActive : layoutClass.mobileBottomNavItem
+                }
+              >
+                <span style={{ fontSize: 20 }}>{item.icon}</span>
                 <span>{item.shortTitle}</span>
-              </BottomNavItem>
+              </span>
             )}
           </RouterNavLink>
         ))}
-      </BottomNav>
-    </AppShell>
+      </nav>
+    </AntLayout>
   );
 }

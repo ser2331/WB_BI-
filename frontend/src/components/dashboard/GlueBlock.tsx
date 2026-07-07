@@ -2,15 +2,8 @@ import { memo } from 'react';
 import type { GlueBlock as GlueBlockType } from '@/types/dashboard';
 import { fmtNum, fmtPct } from '@/utils/format';
 import { ProductCard } from './ProductCard';
-import {
-  GlueBlockCard,
-  GlueHead,
-  GlueMetrics,
-  GlueTitle,
-  Metric,
-  ProductsRow,
-  ScrollHint,
-} from './dashboard.styles';
+import { layoutClass } from './dashboard.layout';
+import { Card, Col, Row, Statistic, Typography } from 'antd';
 
 const MetricCell = memo(function MetricCell({
   label,
@@ -24,39 +17,62 @@ const MetricCell = memo(function MetricCell({
   percent?: boolean;
 }) {
   return (
-    <Metric>
-      <span>{label}</span>
-      <strong>{percent ? fmtPct(value, digits) : fmtNum(value, digits)}</strong>
-    </Metric>
+    <Statistic
+      title={label}
+      value={percent ? fmtPct(value, digits) : fmtNum(value, digits)}
+      valueStyle={{ fontSize: 16 }}
+    />
   );
 });
 
 export const GlueBlock = memo(function GlueBlock({ block }: { block: GlueBlockType }) {
   return (
-    <GlueBlockCard>
-      <GlueHead>
-        <GlueTitle>
-          <strong>{block.title}</strong>
-          <span>
+    <Card
+      styles={{
+        header: {
+          background: 'linear-gradient(90deg, rgba(124, 92, 252, 0.1), rgba(56, 189, 248, 0.06))',
+        },
+      }}
+      title={
+        <div>
+          <Typography.Text strong style={{ fontSize: 16 }}>
+            {block.title}
+          </Typography.Text>
+          <Typography.Paragraph type="secondary" style={{ margin: '4px 0 0', fontSize: 13 }}>
             {block.brands.join(', ') || '—'} · {fmtNum(block.skuCount)} SKU WB
             {block.periodLabel ? ` · ${block.periodLabel}` : ''}
-          </span>
-        </GlueTitle>
-        <GlueMetrics>
+          </Typography.Paragraph>
+        </div>
+      }
+    >
+      <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+        <Col xs={8} sm={4} md={4}>
           <MetricCell label="Заказано" value={block.orders} />
+        </Col>
+        <Col xs={8} sm={4} md={4}>
           <MetricCell label="Продано" value={block.sales} />
+        </Col>
+        <Col xs={8} sm={4} md={4}>
           <MetricCell label="Остаток" value={block.stock} />
+        </Col>
+        <Col xs={8} sm={4} md={4}>
           <MetricCell label="СПП" value={block.spp} digits={2} percent />
+        </Col>
+        <Col xs={8} sm={4} md={4}>
           <MetricCell label="CTR рекл." value={block.ad_ctr} digits={2} percent />
-        </GlueMetrics>
-      </GlueHead>
-      {block.products.length > 2 && <ScrollHint>← листайте карточки →</ScrollHint>}
-      <ProductsRow>
+        </Col>
+      </Row>
+
+      {block.products.length > 2 ? (
+        <div className={layoutClass.scrollHint}>← листайте карточки →</div>
+      ) : null}
+
+      <div className={layoutClass.productsRow}>
         {block.products.map((p) => (
           <ProductCard key={p.nm} product={p} />
         ))}
-      </ProductsRow>
-    </GlueBlockCard>
+      </div>
+    </Card>
   );
 });
 
