@@ -179,23 +179,27 @@ export function CategoryDetailPage() {
 
       <section className={layoutClass.dashboardSection} id="blocks">
         <Card
+          className={layoutClass.blocksCard}
           title={`Склейки (${data?.total ?? 0})`}
           extra={
-            <Space wrap>
+            <div className={layoutClass.cardToolbar}>
               <BlockSortControls
+                className="card-toolbar__sort"
                 sortBy={blockSortBy}
                 sortDir={blockSortDir}
                 onSortByChange={setBlockSortBy}
                 onSortDirToggle={() => setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))}
               />
               <Button
+                className="card-toolbar__export"
+                size="small"
                 icon={<DownloadOutlined />}
                 loading={exporting}
                 onClick={() => void handleExport()}
               >
                 Экспорт CSV
               </Button>
-            </Space>
+            </div>
           }
         >
           {!data?.items.length ? (

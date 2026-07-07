@@ -19,30 +19,38 @@ interface Props {
   sortDir: SortDirection;
   onSortByChange: (field: BlockSortField) => void;
   onSortDirToggle: () => void;
+  className?: string;
 }
 
-export function BlockSortControls({ sortBy, sortDir, onSortByChange, onSortDirToggle }: Props) {
+export function BlockSortControls({
+  sortBy,
+  sortDir,
+  onSortByChange,
+  onSortDirToggle,
+  className,
+}: Props) {
   const dirLabel = useMemo(
     () => (sortDir === 'desc' ? 'По убыванию' : 'По возрастанию'),
     [sortDir]
   );
 
   return (
-    <Space wrap size="small">
+    <Space wrap size="small" align="center" className={className}>
       <Typography.Text type="secondary">Сортировка</Typography.Text>
       <Select
         size="small"
-        style={{ minWidth: 140 }}
+        style={{ minWidth: 120 }}
         value={sortBy}
         onChange={onSortByChange}
         options={SORT_OPTIONS}
       />
       <Button
         size="small"
+        className="card-toolbar__sort-dir"
         icon={sortDir === 'desc' ? <SortDescendingOutlined /> : <SortAscendingOutlined />}
         onClick={onSortDirToggle}
       >
-        {dirLabel}
+        <span className="card-toolbar__sort-dir-text">{dirLabel}</span>
       </Button>
     </Space>
   );
