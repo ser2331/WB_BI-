@@ -1,5 +1,6 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import type { FilterOptions } from '@/types/dashboardApi';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { Button, Card, Col, Input, Pagination, Row, Select, Space, Typography } from 'antd';
 
@@ -38,10 +39,23 @@ export const DashboardFilters = memo(function DashboardFilters({
   showSubject = true,
   paging,
 }: Props) {
+  const [searchInput, setSearchInput] = useState(filters.search);
+  const debouncedSearch = useDebouncedValue(searchInput, 400);
+
+  useEffect(() => {
+    setSearchInput(filters.search);
+  }, [filters.search]);
+
   const set = useCallback(
     (patch: Partial<FiltersState>) => onChange({ ...filters, ...patch }),
     [filters, onChange]
   );
+
+  useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      set({ search: debouncedSearch });
+    }
+  }, [debouncedSearch, filters.search, set]);
 
   const hasActive = filters.periodKey || filters.subject || filters.brand || filters.search;
   const showPaging = paging && paging.total > 0;
@@ -111,8 +125,12 @@ export const DashboardFilters = memo(function DashboardFilters({
             <Input.Search
               allowClear
               placeholder="SKU, артикул, название…"
-              value={filters.search}
-              onChange={(e) => set({ search: e.target.value })}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onSearch={(value) => {
+                setSearchInput(value);
+                set({ search: value });
+              }}
             />
           </Col>
 

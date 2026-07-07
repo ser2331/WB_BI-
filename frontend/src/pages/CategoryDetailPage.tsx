@@ -1,5 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { DownloadOutlined } from '@ant-design/icons';
+import { App } from 'antd';
 import { buildQueryString } from '@/types/dashboardApi';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
 import {
@@ -8,21 +10,39 @@ import {
   useGetDashboardMetaQuery,
 } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
+import { BlockSortControls } from '@/components/dashboard/BlockSortControls';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { GlueBlocksList } from '@/components/dashboard/GlueBlock';
 import { HeroSection } from '@/components/dashboard/HeroSection';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
+import {
+  BLOCK_EXPORT_COLUMNS,
+  flattenBlocksForExport,
+  formatCountLabel,
+  formatExportFilename,
+} from '@/constants/exportColumns';
+import { fetchAllBlocks } from '@/utils/fetchAllPages';
+import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
+import {
+  sortGlueBlocks,
+  type BlockSortField,
+  type SortDirection,
+} from '@/utils/sortGlueBlocks';
 import { Button, Card, Empty, Space } from 'antd';
 
 export function CategoryDetailPage() {
+  const { message } = App.useApp();
   const { subject: subjectParam } = useParams<{ subject: string }>();
   const subject = useMemo(
     () => (subjectParam ? decodeURIComponent(subjectParam) : ''),
     [subjectParam]
   );
   const { params, apiQuery, setParams } = useDashboardParams(10);
+  const [blockSortBy, setBlockSortBy] = useState<BlockSortField>('orders');
+  const [blockSortDir, setBlockSortDir] = useState<SortDirection>('desc');
+  const [exporting, setExporting] = useState(false);
 
   const blocksQuery = useMemo(
     () => ({
@@ -49,6 +69,11 @@ export function CategoryDetailPage() {
     error: blocksError,
   } = useGetCategoryBlocksQuery(blocksQuery, { skip: !subject });
 
+  const sortedBlocks = useMemo(
+    () => sortGlueBlocks(data?.items ?? [], blockSortBy, blockSortDir),
+    [data?.items, blockSortBy, blockSortDir]
+  );
+
   const backQuery = buildQueryString({
     periodKey: params.periodKey,
     subject: params.subject,
@@ -60,6 +85,33 @@ export function CategoryDetailPage() {
   const loading = metaLoading || (blocksLoading && !data);
   const error = getErrorMessage(metaError ?? filtersError ?? blocksError, '');
   const busy = Boolean(subject) && blocksFetching && !blocksLoading;
+
+  const handleExport = async () => {
+    if (!subject) return;
+    setExporting(true);
+    try {
+      const blocks = await fetchAllBlocks({
+        subject,
+        periodKey: apiQuery.periodKey,
+        brand: apiQuery.brand,
+        search: apiQuery.search,
+      });
+      const rows = flattenBlocksForExport(blocks, subject);
+      if (!rows.length) {
+        message.warning('Нет данных для экспорта');
+        return;
+      }
+      downloadCsv(
+        formatExportFilename(`blocks_${subject.replace(/[^\wа-яА-Я-]+/gi, '_')}`),
+        rowsToCsv(rows, BLOCK_EXPORT_COLUMNS)
+      );
+      message.success(`Экспортировано ${formatCountLabel(rows.length)} строк`);
+    } catch {
+      message.error('Не удалось экспортировать данные');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (!subject) {
     return (
@@ -130,12 +182,33 @@ export function CategoryDetailPage() {
       </section>
 
       <section className={layoutClass.dashboardSection} id="blocks">
-        <Card title={`Склейки (${data?.total ?? 0})`}>
+        <Card
+          title={`Склейки (${data?.total ?? 0})`}
+          extra={
+            <Space wrap>
+              <BlockSortControls
+                sortBy={blockSortBy}
+                sortDir={blockSortDir}
+                onSortByChange={setBlockSortBy}
+                onSortDirToggle={() =>
+                  setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))
+                }
+              />
+              <Button
+                icon={<DownloadOutlined />}
+                loading={exporting}
+                onClick={() => void handleExport()}
+              >
+                Экспорт CSV
+              </Button>
+            </Space>
+          }
+        >
           {!data?.items.length ? (
             <Empty description="По фильтрам склеек не найдено" />
           ) : (
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <GlueBlocksList blocks={data.items} />
+              <GlueBlocksList blocks={sortedBlocks} />
             </Space>
           )}
         </Card>

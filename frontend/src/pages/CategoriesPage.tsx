@@ -1,7 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { DownloadOutlined } from '@ant-design/icons';
+import { App } from 'antd';
 import { buildQueryString } from '@/types/dashboardApi';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
-import { useAuth } from '@/hooks/useAuth';
 import {
   useGetCategoriesQuery,
   useGetDashboardFiltersQuery,
@@ -11,14 +13,23 @@ import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { HeroSection } from '@/components/dashboard/HeroSection';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
+import {
+  CATEGORY_EXPORT_COLUMNS,
+  formatExportFilename,
+  formatCountLabel,
+} from '@/constants/exportColumns';
+import { fetchAllCategories } from '@/utils/fetchAllPages';
+import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
 import { fmtNum } from '@/utils/format';
 import { Button, Card, Empty, Space, Typography } from 'antd';
 
 export function CategoriesPage() {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { message } = App.useApp();
+  const [exporting, setExporting] = useState(false);
   const { params, apiQuery, setParams } = useDashboardParams(15);
 
   const { data: meta, isLoading: metaLoading, error: metaError } = useGetDashboardMetaQuery();
@@ -50,6 +61,23 @@ export function CategoriesPage() {
     void navigate(`/category/${encodeURIComponent(subject)}${q}`);
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const rows = await fetchAllCategories(apiQuery);
+      if (!rows.length) {
+        message.warning('Нет данных для экспорта');
+        return;
+      }
+      downloadCsv(formatExportFilename('categories'), rowsToCsv(rows, CATEGORY_EXPORT_COLUMNS));
+      message.success(`Экспортировано ${formatCountLabel(rows.length)} категорий`);
+    } catch {
+      message.error('Не удалось экспортировать данные');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={layoutClass.dashboardRoot}>
@@ -61,19 +89,7 @@ export function CategoriesPage() {
   if (!hasData) {
     return (
       <PageOverlay className={layoutClass.dashboardRoot} error={error || null}>
-        <Card>
-          <Empty description="Данные ещё не загружены">
-            {isAdmin ? (
-              <Link to="/import">
-                <Button type="primary">Перейти к импорту</Button>
-              </Link>
-            ) : (
-              <Typography.Text type="secondary">
-                Обратитесь к администратору для загрузки данных
-              </Typography.Text>
-            )}
-          </Empty>
-        </Card>
+        <EmptyDataState description="Данные ещё не загружены" />
       </PageOverlay>
     );
   }
@@ -123,7 +139,18 @@ export function CategoriesPage() {
       </section>
 
       <section className={layoutClass.dashboardSection} id="categories">
-        <Card title={`Категории (${data?.total ?? 0})`}>
+        <Card
+          title={`Категории (${data?.total ?? 0})`}
+          extra={
+            <Button
+              icon={<DownloadOutlined />}
+              loading={exporting}
+              onClick={() => void handleExport()}
+            >
+              Экспорт CSV
+            </Button>
+          }
+        >
           {!data?.items.length ? (
             <Empty description="По фильтрам категории не найдены" />
           ) : (
@@ -141,7 +168,8 @@ export function CategoriesPage() {
                   </Typography.Text>
                   <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0' }}>
                     {fmtNum(cat.glues)} склеек · {fmtNum(cat.sku)} SKU · заказы {fmtNum(cat.orders)}{' '}
-                    · остаток {cat.stock != null ? fmtNum(cat.stock) : '—'}
+                    · продажи {fmtNum(cat.sales)} · остаток{' '}
+                    {cat.stock != null ? fmtNum(cat.stock) : '—'}
                   </Typography.Paragraph>
                 </Card>
               ))}
