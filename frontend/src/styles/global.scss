@@ -12,6 +12,10 @@
   --color-warning: #fbbf24;
   --color-danger: #f87171;
   --color-accent: #38bdf8;
+  --scrollbar-size: 8px;
+  --scrollbar-track: #1a1d27;
+  --scrollbar-thumb: #3d4358;
+  --scrollbar-thumb-hover: #5c4fd4;
   --radius: 12px;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   --font: 'Inter', system-ui, -apple-system, sans-serif;
@@ -30,6 +34,9 @@
   --color-warning: #d97706;
   --color-danger: #dc2626;
   --color-accent: #0284c7;
+  --scrollbar-track: #e8eaef;
+  --scrollbar-thumb: #c5cad6;
+  --scrollbar-thumb-hover: #7c5cfc;
   --shadow: 0 4px 24px rgba(15, 17, 23, 0.08);
 }
 
@@ -62,23 +69,47 @@ a {
   text-decoration: none;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+@mixin app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border: 2px solid var(--scrollbar-track);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: var(--scrollbar-track);
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
-  border-radius: 4px;
+html {
+  @include app-scrollbar;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+.dashboard-root,
+.products-row,
+.ant-table-body,
+.ant-table-content,
+.ant-select-dropdown .rc-virtual-list-holder,
+.desktop-sider .ant-layout-sider-children {
+  @include app-scrollbar;
 }
 
 .ant-layout-sider .ant-menu-item a {

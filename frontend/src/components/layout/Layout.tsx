@@ -1,8 +1,11 @@
+import { useCallback, useState } from 'react';
 import {
   BarChartOutlined,
   DatabaseOutlined,
   FolderOpenOutlined,
   LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   MoonOutlined,
   SunOutlined,
   TableOutlined,
@@ -18,6 +21,16 @@ import { logout } from '@/store/authSlice';
 import './layout.scss';
 
 const { Header, Sider, Content } = AntLayout;
+
+const SIDER_COLLAPSED_KEY = 'wb_bi_sider_collapsed';
+
+function loadSiderCollapsed(): boolean {
+  try {
+    return localStorage.getItem(SIDER_COLLAPSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 const allNavItems = [
   { key: '/', label: 'Категории', icon: <TableOutlined />, shortTitle: 'Категории', adminOnly: false },
@@ -63,6 +76,16 @@ export function Layout() {
   const { token } = theme.useToken();
   const { user, isAdmin } = useAuth();
   const { isDark, setMode } = useThemeMode();
+  const [collapsed, setCollapsed] = useState(loadSiderCollapsed);
+
+  const handleSiderCollapse = useCallback((value: boolean) => {
+    setCollapsed(value);
+    try {
+      localStorage.setItem(SIDER_COLLAPSED_KEY, value ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const navItems = allNavItems.filter((item) => !item.adminOnly || isAdmin);
   const selectedKey = navItems.find((item) =>
@@ -81,20 +104,38 @@ export function Layout() {
 
   return (
     <AntLayout className="app-shell">
-      <Sider width={240} theme={isDark ? 'dark' : 'light'} className="desktop-sider">
-        <div className="logo">
-          <span>WB BI</span>
+      <Sider
+        className="desktop-sider"
+        width={240}
+        collapsedWidth={72}
+        collapsible
+        collapsed={collapsed}
+        onCollapse={handleSiderCollapse}
+        theme={isDark ? 'dark' : 'light'}
+        trigger={null}
+      >
+        <div className={`logo${collapsed ? ' logo--collapsed' : ''}`}>
+          <span>{collapsed ? 'WB' : 'WB BI'}</span>
         </div>
         <Menu
           mode="inline"
+          inlineCollapsed={collapsed}
           selectedKeys={selectedKey ? [selectedKey] : []}
           onClick={({ key }) => void navigate(key)}
           items={navItems.map((item) => ({
             key: item.key,
             icon: item.icon,
             label: item.label,
+            title: item.label,
           }))}
-          style={{ borderInlineEnd: 0, background: 'transparent' }}
+          style={{ borderInlineEnd: 0, background: 'transparent', flex: 1 }}
+        />
+        <Button
+          type="text"
+          className="sider-collapse-btn"
+          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          onClick={() => handleSiderCollapse(!collapsed)}
+          aria-label={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
         />
       </Sider>
 

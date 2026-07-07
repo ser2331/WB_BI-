@@ -18,6 +18,9 @@ export const cssVarsByTheme: Record<ThemeMode, Record<string, string>> = {
     '--color-warning': '#fbbf24',
     '--color-danger': '#f87171',
     '--color-accent': '#38bdf8',
+    '--scrollbar-track': '#1a1d27',
+    '--scrollbar-thumb': '#3d4358',
+    '--scrollbar-thumb-hover': '#5c4fd4',
     '--shadow': '0 4px 24px rgba(0, 0, 0, 0.3)',
   },
   light: {
@@ -33,6 +36,9 @@ export const cssVarsByTheme: Record<ThemeMode, Record<string, string>> = {
     '--color-warning': '#d97706',
     '--color-danger': '#dc2626',
     '--color-accent': '#0284c7',
+    '--scrollbar-track': '#e8eaef',
+    '--scrollbar-thumb': '#c5cad6',
+    '--scrollbar-thumb-hover': '#7c5cfc',
     '--shadow': '0 4px 24px rgba(15, 17, 23, 0.08)',
   },
 };
