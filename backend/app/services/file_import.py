@@ -63,6 +63,7 @@ def _map_row(raw: dict[str, Any]) -> dict[str, Any]:
 def _to_float(value: Any) -> float | None:
     return _coerce_optional_float(value)
 
+
 def _product_from_mapped(m: dict[str, Any]) -> ProductCard | None:
     nm = m.get("nm")
     if not nm:
