@@ -1,5 +1,7 @@
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from app.api.deps import get_current_user, require_admin
+from app.schemas.auth import AuthUser
 from app.schemas.dashboard_data import ImportResponse
 from app.services.dataset_memory import clear_dataset, get_dataset, save_dataset
 from app.services.file_import import parse_upload
@@ -9,7 +11,10 @@ router = APIRouter(prefix="/api", tags=["import"])
 
 
 @router.post("/import", response_model=ImportResponse)
-async def import_file(file: UploadFile = File(...)):
+async def import_file(
+    file: UploadFile = File(...),
+    _: AuthUser = Depends(require_admin),
+):
     if not file.filename:
         raise HTTPException(status_code=400, detail="Имя файла не указано")
 
@@ -43,7 +48,7 @@ async def import_file(file: UploadFile = File(...)):
 
 
 @router.get("/import/status")
-async def import_status():
+async def import_status(_: AuthUser = Depends(get_current_user)):
     dataset = get_dataset()
     if not dataset:
         return {"has_data": False}
@@ -56,7 +61,7 @@ async def import_status():
 
 
 @router.delete("/import")
-async def delete_import():
+async def delete_import(_: AuthUser = Depends(require_admin)):
     removed = clear_dataset()
     clear_photo_cache()
     if not removed:

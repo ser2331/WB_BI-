@@ -145,6 +145,28 @@ export const PageTitle = styled.h1`
   }
 `;
 
+export const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+`;
+
+export const UserBadge = styled.span`
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+
+  strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+`;
+
 export const Content = styled.div`
   flex: 1;
   min-height: 0;

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { buildQueryString } from '@/types/dashboardApi';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
+import { useAuth } from '@/hooks/useAuth';
 import {
   useGetCategoriesQuery,
   useGetDashboardFiltersQuery,
@@ -30,6 +31,7 @@ import { fmtNum } from '@/utils/format';
 
 export function CategoriesPage() {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const { params, apiQuery, setParams } = useDashboardParams(15);
 
   const { data: meta, isLoading: metaLoading, error: metaError } = useGetDashboardMetaQuery();
@@ -79,11 +81,17 @@ export function CategoriesPage() {
         <Card>
           <EmptyState>
             <p style={{ marginBottom: 16, fontSize: 16 }}>Данные ещё не загружены</p>
-            <Link to="/import">
-              <Button $variant="primary" as="span">
-                Перейти к импорту
-              </Button>
-            </Link>
+            {isAdmin ? (
+              <Link to="/import">
+                <Button $variant="primary" as="span">
+                  Перейти к импорту
+                </Button>
+              </Link>
+            ) : (
+              <p style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>
+                Обратитесь к администратору для загрузки данных
+              </p>
+            )}
           </EmptyState>
         </Card>
       </PageScroll>

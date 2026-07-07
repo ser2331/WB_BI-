@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.api.deps import get_current_user
 from app.schemas.dashboard_api import (
     DashboardKpis,
     DashboardMeta,
@@ -18,7 +19,11 @@ from app.services.dataset_query import (
 )
 from app.services.photo_resolver import resolve_product_photo
 
-router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
+router = APIRouter(
+    prefix="/api/dashboard",
+    tags=["dashboard"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def _require_dataset():

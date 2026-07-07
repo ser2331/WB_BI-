@@ -1,4 +1,8 @@
-import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink as RouterNavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { wbApi } from '@/api/wbApi';
+import { useAuth } from '@/hooks/useAuth';
+import { useAppDispatch } from '@/store/hooks';
+import { logout } from '@/store/authSlice';
 import {
   AppShell,
   Sidebar,
@@ -11,11 +15,14 @@ import {
   Header,
   PageTitle,
   Content,
+  HeaderActions,
+  UserBadge,
+  Button,
 } from './Layout.styles';
 
-const navItems = [
-  { to: '/', label: 'Категории', icon: '📂', shortTitle: 'Категории' },
-  { to: '/import', label: 'Импорт', icon: '📁', shortTitle: 'Импорт' },
+const allNavItems = [
+  { to: '/', label: 'Категории', icon: '📂', shortTitle: 'Категории', adminOnly: false },
+  { to: '/import', label: 'Импорт', icon: '📁', shortTitle: 'Импорт', adminOnly: true },
 ];
 
 const pageTitles: Record<string, string> = {
@@ -23,11 +30,28 @@ const pageTitles: Record<string, string> = {
   '/import': 'Импорт данных',
 };
 
+const roleLabels = {
+  admin: 'Администратор',
+  user: 'Пользователь',
+} as const;
+
 export function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user, isAdmin } = useAuth();
+
+  const navItems = allNavItems.filter((item) => !item.adminOnly || isAdmin);
+
   const pageTitle = location.pathname.startsWith('/category/')
     ? decodeURIComponent(location.pathname.replace('/category/', ''))
     : (pageTitles[location.pathname] ?? 'WB BI');
+
+  const handleLogout = () => {
+    dispatch(logout());
+    dispatch(wbApi.util.resetApiState());
+    void navigate('/login', { replace: true });
+  };
 
   return (
     <AppShell>
@@ -51,6 +75,16 @@ export function Layout() {
       <Main>
         <Header>
           <PageTitle>{pageTitle}</PageTitle>
+          <HeaderActions>
+            {user && (
+              <UserBadge>
+                <strong>{user.username}</strong> · {roleLabels[user.role]}
+              </UserBadge>
+            )}
+            <Button type="button" onClick={handleLogout}>
+              Выйти
+            </Button>
+          </HeaderActions>
         </Header>
         <Content>
           <Outlet />

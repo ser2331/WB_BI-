@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
+from app.api.auth_routes import router as auth_router
 from app.api.dashboard_routes import router as dashboard_router
 from app.api.import_routes import router as import_router
 from app.api.routes import router as legacy_router
@@ -55,6 +56,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(import_router)
 app.include_router(dashboard_router)
 app.include_router(legacy_router)

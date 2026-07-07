@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     mock_wb: bool = False
     auto_seed_mock: bool = False
 
+    jwt_secret: str = "change-me-in-production"
+    jwt_expire_minutes: int = 60 * 24 * 7
+    admin_username: str = "admin"
+    admin_password: str = "admin"
+    user_username: str = "user"
+    user_password: str = "user"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

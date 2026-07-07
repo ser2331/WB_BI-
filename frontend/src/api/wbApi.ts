@@ -1,4 +1,11 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import {
+  createApi,
+  type BaseQueryFn,
+  type FetchArgs,
+  type FetchBaseQueryError,
+} from '@reduxjs/toolkit/query/react';
+import { baseQueryWithAuth } from '@/api/baseQuery';
+import { logout } from '@/store/authSlice';
 import type {
   DashboardMeta,
   DashboardQueryParams,
@@ -8,9 +15,19 @@ import type {
   PhotoResolveResponse,
 } from '@/types/dashboardApi';
 import type { ImportResponse } from '@/types/dashboard';
+import type { AuthUser, LoginRequest, LoginResponse } from '@/types/auth';
 
-const API_HOST = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-const BASE_URL = API_HOST ? `${API_HOST}/api` : '/api';
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions
+) => {
+  const result = await baseQueryWithAuth(args, api, extraOptions);
+  if (result.error?.status === 401 && api.endpoint !== 'login') {
+    api.dispatch(logout());
+  }
+  return result;
+};
 
 export type CategoriesQueryArgs = DashboardQueryParams;
 
@@ -28,9 +45,22 @@ function buildParams(params: Record<string, string | number | undefined>): Recor
 
 export const wbApi = createApi({
   reducerPath: 'wbApi',
-  baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
-  tagTypes: ['Dashboard'],
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['Dashboard', 'Auth'],
   endpoints: (builder) => ({
+    login: builder.mutation<LoginResponse, LoginRequest>({
+      query: (body) => ({
+        url: '/auth/login',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    getMe: builder.query<AuthUser, void>({
+      query: () => '/auth/me',
+      providesTags: ['Auth'],
+    }),
+
     getDashboardMeta: builder.query<DashboardMeta, void>({
       query: () => '/dashboard/meta',
       providesTags: ['Dashboard'],
@@ -99,6 +129,8 @@ export const wbApi = createApi({
 });
 
 export const {
+  useLoginMutation,
+  useGetMeQuery,
   useGetDashboardMetaQuery,
   useGetDashboardFiltersQuery,
   useGetCategoriesQuery,

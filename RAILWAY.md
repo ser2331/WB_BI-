@@ -70,6 +70,12 @@ DEBUG=false
 DATABASE_URL=sqlite+aiosqlite:////tmp/wb_bi.db
 CORS_ORIGINS=https://ser2331.github.io,http://localhost:5173
 CORS_ORIGIN_REGEX=https://([a-zA-Z0-9-]+\.)?github\.io
+JWT_SECRET=замени-на-длинную-случайную-строку
+JWT_EXPIRE_MINUTES=10080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=надёжный-пароль
+USER_USERNAME=user
+USER_PASSWORD=надёжный-пароль
 ```
 
 > **CORS:** без `CORS_ORIGINS` фронт на GitHub Pages получит `Failed to fetch`.  
@@ -92,8 +98,8 @@ CORS_ORIGIN_REGEX=https://([a-zA-Z0-9-]+\.)?github\.io
 ## 5. Проверка
 
 1. Pages: https://ser2331.github.io/WB_BI/
-2. В шапке должно быть **🧪 Демо Магазин WB BI** (mock-режим)
-3. Дашборд с графиками и KPI
+2. Страница входа — войдите как `admin` или `user` (пароли из Variables Railway)
+3. Админ: импорт данных; пользователь: только просмотр дашборда
 
 ## Локальная разработка (без изменений)
 

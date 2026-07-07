@@ -11,7 +11,8 @@
 
 ## Возможности
 
-- **Импорт файлов** CSV и JSON на бэкенд
+- **Авторизация** — два роли: администратор (импорт и удаление данных) и пользователь (просмотр, фильтры, анализ)
+- **Импорт файлов** CSV и JSON на бэкенд (только администратор)
 - Обработка и нормализация данных в единую схему (склейки + карточки товаров)
 - **Дашборд** с KPI, фильтрами, сводкой по предметам и горизонтальными карточками SKU
 - JSON в формате `dash_2` (поле `blocks`) загружается напрямую
@@ -44,7 +45,14 @@ npm install
 npm run dev
 ```
 
-UI: http://localhost:5173 → раздел **Импорт** → загрузите `dash_2/assets/dashboard-data.json` или CSV.
+UI: http://localhost:5173 → страница входа. Учётные записи задаются в `backend/.env` (см. `.env.example`).
+
+По умолчанию:
+
+| Роль  | Логин   | Пароль  |
+| ----- | ------- | ------- |
+| Админ | `admin` | `admin` |
+| Юзер  | `user`  | `user`  |
 
 ### Линтеры и проверка типов
 
@@ -68,17 +76,40 @@ ruff format app     # форматирование
 
 В CI: workflow `.github/workflows/lint.yml` (push/PR на main).
 
-## API импорта
+## API
+
+### Авторизация
+
+| Метод | Путь              | Описание                          |
+| ----- | ----------------- | --------------------------------- |
+| POST  | `/api/auth/login` | Логин → JWT (`username`, `password`) |
+| GET   | `/api/auth/me`    | Текущий пользователь (Bearer)     |
+
+Переменные в `backend/.env`:
+
+```env
+JWT_SECRET=...
+JWT_EXPIRE_MINUTES=10080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=...
+USER_USERNAME=user
+USER_PASSWORD=...
+```
+
+Все эндпоинты дашборда и `/api/import/status` требуют заголовок `Authorization: Bearer <token>`.  
+`POST /api/import` и `DELETE /api/import` — только роль **admin**.
+
+### Импорт и дашборд
 
 | Метод  | Путь                                         | Описание                                            |
 | ------ | -------------------------------------------- | --------------------------------------------------- |
-| POST   | `/api/import`                                | Загрузка файла (`multipart/form-data`, поле `file`) |
+| POST   | `/api/import`                                | Загрузка файла (admin)                              |
 | GET    | `/api/dashboard/meta`                        | Мета импорта (файл, счётчики)                       |
 | GET    | `/api/dashboard/kpis`                        | KPI: склейки, SKU, остаток (+ фильтры)              |
 | GET    | `/api/dashboard/filters`                     | Списки периодов, предметов, брендов                 |
 | GET    | `/api/dashboard/categories`                  | Категории постранично (+ фильтры)                   |
 | GET    | `/api/dashboard/categories/{subject}/blocks` | Склейки категории постранично (+ фильтры)           |
-| DELETE | `/api/import`                                | Удалить загруженные данные                          |
+| DELETE | `/api/import`                                | Удалить загруженные данные (admin)                  |
 
 Данные хранятся **в памяти** и в файле `backend/data/dataset.json` (без отдельной БД для датасета).
 
