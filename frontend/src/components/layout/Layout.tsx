@@ -10,7 +10,7 @@ import {
   SunOutlined,
   TableOutlined,
 } from '@ant-design/icons';
-import { Button, Layout as AntLayout, Menu, Space, Switch, Tag, Typography, theme } from 'antd';
+import { Button, Layout as AntLayout, Menu, Switch, Tag, Typography, theme } from 'antd';
 import { NavLink as RouterNavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { wbApi } from '@/api/wbApi';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
@@ -147,12 +147,16 @@ export function Layout() {
 
       <AntLayout>
         <Header className="app-header" style={{ background: token.colorBgContainer }}>
-          <Typography.Title level={4} style={{ margin: 0, fontSize: 'clamp(17px, 2vw, 22px)' }}>
+          <Typography.Title
+            level={4}
+            className="app-header__title"
+            style={{ margin: 0, fontSize: 'clamp(17px, 2vw, 22px)' }}
+          >
             {pageTitle}
           </Typography.Title>
 
-          <Space wrap align="center">
-            <Space size={8}>
+          <div className="app-header__actions">
+            <div className="app-header__theme">
               <SunOutlined
                 style={{ color: isDark ? token.colorTextSecondary : token.colorPrimary }}
               />
@@ -166,18 +170,18 @@ export function Layout() {
               <MoonOutlined
                 style={{ color: isDark ? token.colorPrimary : token.colorTextSecondary }}
               />
-            </Space>
+            </div>
 
             {user ? (
-              <Tag color="processing">
+              <Tag className="app-header__user" color="processing">
                 {user.username} · {roleLabels[user.role]}
               </Tag>
             ) : null}
 
-            <Button icon={<LogoutOutlined />} onClick={handleLogout}>
+            <Button className="app-header__logout" icon={<LogoutOutlined />} onClick={handleLogout}>
               Выйти
             </Button>
-          </Space>
+          </div>
         </Header>
 
         <Content className="main-content">
