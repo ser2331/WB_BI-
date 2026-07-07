@@ -2,10 +2,10 @@ import { memo, useMemo } from 'react';
 import type { GlueBlock as GlueBlockType } from '@/types/dashboard';
 import { METRIC_HINTS } from '@/constants/metricHints';
 import { MetricLabel } from '@/components/ui/MetricLabel';
+import { layoutClass } from '@/components/layout/app-layout';
 import { fmtNum, fmtPct } from '@/utils/format';
 import { sortProductsByOrders } from '@/utils/sortGlueBlocks';
 import { ProductCard } from './ProductCard';
-import { layoutClass } from './dashboard.layout';
 import { Card, Col, Row, Statistic, Typography } from 'antd';
 
 const MetricCell = memo(function MetricCell({
@@ -30,8 +30,9 @@ const MetricCell = memo(function MetricCell({
   );
 });
 
-export const GlueBlock = memo(function GlueBlock({ block }: { block: GlueBlockType }) {
+const GlueBlockCard = memo(function GlueBlockCard({ block }: { block: GlueBlockType }) {
   const products = useMemo(() => sortProductsByOrders(block.products), [block.products]);
+
   return (
     <Card
       styles={{
@@ -101,7 +102,7 @@ export const GlueBlocksList = memo(function GlueBlocksList({
   return (
     <>
       {blocks.map((b) => (
-        <GlueBlock key={b.blockId || `${b.periodKey}-${b.groupKey}`} block={b} />
+        <GlueBlockCard key={b.blockId || `${b.periodKey}-${b.groupKey}`} block={b} />
       ))}
     </>
   );

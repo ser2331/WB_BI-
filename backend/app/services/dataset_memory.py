@@ -19,12 +19,6 @@ def get_dataset() -> DashboardDataset | None:
     with _lock:
         return _dataset
 
-
-def has_dataset() -> bool:
-    with _lock:
-        return _dataset is not None
-
-
 def save_dataset(dataset: DashboardDataset) -> None:
     global _dataset
     normalized = normalize_dataset_photos(dataset)

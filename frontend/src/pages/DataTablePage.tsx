@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { DownloadOutlined } from '@ant-design/icons';
-import { App } from 'antd';
 import {
   useGetDashboardFiltersQuery,
   useGetDashboardMetaQuery,
@@ -8,22 +7,19 @@ import {
 } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
-import {
-  ProductSortControls,
-  type ProductSortField,
-} from '@/components/dashboard/ProductSortControls';
 import { ProductTableCard } from '@/components/dashboard/ProductTableCard';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import {
+  PRODUCT_SORT_OPTIONS,
+  SortControls,
+  type ProductSortField,
+} from '@/components/dashboard/SortControls';
+import { layoutClass } from '@/components/layout/app-layout';
 import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
-import {
-  formatCountLabel,
-  formatExportFilename,
-  PRODUCT_EXPORT_COLUMNS,
-} from '@/constants/exportColumns';
+import { PRODUCT_EXPORT_COLUMNS } from '@/constants/exportColumns';
 import { fetchAllProducts } from '@/utils/fetchAllPages';
-import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
+import { useCsvExport } from '@/hooks/useCsvExport';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { fmtNum, fmtPct } from '@/utils/format';
@@ -36,9 +32,8 @@ function rowKey(row: ProductTableRow) {
 }
 
 export function DataTablePage() {
-  const { message } = App.useApp();
   const isMobile = useIsMobile();
-  const [exporting, setExporting] = useState(false);
+  const { exporting, exportCsv } = useCsvExport();
   const { params, apiQuery, setParams } = useDashboardParams(25);
 
   const { data: meta, isLoading: metaLoading, error: metaError } = useGetDashboardMetaQuery();
@@ -148,21 +143,13 @@ export function DataTablePage() {
     [params.sortBy, params.sortDir]
   );
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const rows = await fetchAllProducts(apiQuery);
-      if (!rows.length) {
-        message.warning('Нет данных для экспорта');
-        return;
-      }
-      downloadCsv(formatExportFilename('products'), rowsToCsv(rows, PRODUCT_EXPORT_COLUMNS));
-      message.success(`Экспортировано ${formatCountLabel(rows.length)} товаров`);
-    } catch {
-      message.error('Не удалось экспортировать данные');
-    } finally {
-      setExporting(false);
-    }
+  const handleExport = () => {
+    void exportCsv({
+      fetchRows: () => fetchAllProducts(apiQuery),
+      columns: PRODUCT_EXPORT_COLUMNS,
+      filenamePrefix: 'products',
+      itemLabel: 'товаров',
+    });
   };
 
   const handleMobileSortBy = (field: ProductSortField) => {
@@ -233,14 +220,14 @@ export function DataTablePage() {
 
       <section className={layoutClass.dashboardSection}>
         <Card
-          className={layoutClass.blocksCard}
+          className={layoutClass.dashboardCard}
           title={`Все товары (${data?.total ?? 0})`}
           extra={
             <Button
               size="small"
               icon={<DownloadOutlined />}
               loading={exporting}
-              onClick={() => void handleExport()}
+              onClick={handleExport}
             >
               Экспорт CSV
             </Button>
@@ -248,9 +235,11 @@ export function DataTablePage() {
         >
           {isMobile ? (
             <>
-              <ProductSortControls
+              <SortControls
                 sortBy={params.sortBy}
                 sortDir={params.sortDir}
+                options={[...PRODUCT_SORT_OPTIONS]}
+                defaultField="orders"
                 onSortByChange={handleMobileSortBy}
                 onSortDirToggle={handleMobileSortDirToggle}
               />

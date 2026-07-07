@@ -1,4 +1,4 @@
-import './dashboard.layout.scss';
+import './app-layout.scss';
 
 export const layoutClass = {
   dashboardRoot: 'dashboard-root',
@@ -9,5 +9,5 @@ export const layoutClass = {
   mobileBottomNav: 'mobile-bottom-nav',
   mobileBottomNavItem: 'mobile-bottom-nav-item',
   mobileBottomNavItemActive: 'mobile-bottom-nav-item mobile-bottom-nav-item--active',
-  blocksCard: 'blocks-card',
+  dashboardCard: 'dashboard-card',
 } as const;

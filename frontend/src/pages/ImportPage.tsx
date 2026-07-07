@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { App, Modal } from 'antd';
 import { useClearImportMutation, useImportFileMutation } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { layoutClass } from '@/components/layout/app-layout';
 import { PageOverlay } from '@/components/ui/PageOverlay';
 import { Button, Card, Space, Typography, Upload } from 'antd';
 import type { UploadFile } from 'antd';

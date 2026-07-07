@@ -141,16 +141,14 @@ async def list_category_blocks(
     subject: str,
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    period_key: str | None = Query(None, alias="periodKey"),
-    brand: str | None = None,
-    search: str | None = None,
+    base_filters: QueryFilters = Depends(_parse_filters),
 ):
     dataset = _require_dataset()
     filters = QueryFilters(
-        period_key=period_key or None,
+        period_key=base_filters.period_key,
         subject=subject,
-        brand=brand or None,
-        search=search or None,
+        brand=base_filters.brand,
+        search=base_filters.search,
     )
     blocks = filter_blocks(dataset.blocks, filters)
     if not blocks:

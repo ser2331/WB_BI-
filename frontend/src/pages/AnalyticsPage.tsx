@@ -7,7 +7,7 @@ import { getErrorMessage } from '@/api/error';
 import { ChartWidget, GroupedChartWidget } from '@/components/analytics/ChartWidget';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { HeroSection } from '@/components/dashboard/HeroSection';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { layoutClass } from '@/components/layout/app-layout';
 import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';

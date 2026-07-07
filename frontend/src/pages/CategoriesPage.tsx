@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { DownloadOutlined } from '@ant-design/icons';
-import { App } from 'antd';
 import { buildQueryString } from '@/types/dashboardApi';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
+import { useCsvExport } from '@/hooks/useCsvExport';
 import {
   useGetCategoriesQuery,
   useGetDashboardFiltersQuery,
@@ -12,24 +11,18 @@ import {
 import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { HeroSection } from '@/components/dashboard/HeroSection';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { layoutClass } from '@/components/layout/app-layout';
 import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
-import {
-  CATEGORY_EXPORT_COLUMNS,
-  formatExportFilename,
-  formatCountLabel,
-} from '@/constants/exportColumns';
+import { CATEGORY_EXPORT_COLUMNS } from '@/constants/exportColumns';
 import { fetchAllCategories } from '@/utils/fetchAllPages';
-import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
 import { fmtNum } from '@/utils/format';
 import { Button, Card, Empty, Space, Typography } from 'antd';
 
 export function CategoriesPage() {
   const navigate = useNavigate();
-  const { message } = App.useApp();
-  const [exporting, setExporting] = useState(false);
+  const { exporting, exportCsv } = useCsvExport();
   const { params, apiQuery, setParams } = useDashboardParams(15);
 
   const { data: meta, isLoading: metaLoading, error: metaError } = useGetDashboardMetaQuery();
@@ -61,21 +54,13 @@ export function CategoriesPage() {
     void navigate(`/category/${encodeURIComponent(subject)}${q}`);
   };
 
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const rows = await fetchAllCategories(apiQuery);
-      if (!rows.length) {
-        message.warning('Нет данных для экспорта');
-        return;
-      }
-      downloadCsv(formatExportFilename('categories'), rowsToCsv(rows, CATEGORY_EXPORT_COLUMNS));
-      message.success(`Экспортировано ${formatCountLabel(rows.length)} категорий`);
-    } catch {
-      message.error('Не удалось экспортировать данные');
-    } finally {
-      setExporting(false);
-    }
+  const handleExport = () => {
+    void exportCsv({
+      fetchRows: () => fetchAllCategories(apiQuery),
+      columns: CATEGORY_EXPORT_COLUMNS,
+      filenamePrefix: 'categories',
+      itemLabel: 'категорий',
+    });
   };
 
   if (loading) {
@@ -140,12 +125,14 @@ export function CategoriesPage() {
 
       <section className={layoutClass.dashboardSection} id="categories">
         <Card
+          className={layoutClass.dashboardCard}
           title={`Категории (${data?.total ?? 0})`}
           extra={
             <Button
+              size="small"
               icon={<DownloadOutlined />}
               loading={exporting}
-              onClick={() => void handleExport()}
+              onClick={handleExport}
             >
               Экспорт CSV
             </Button>

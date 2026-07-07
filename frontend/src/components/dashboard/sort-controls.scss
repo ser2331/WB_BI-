@@ -1,4 +1,4 @@
-.block-sort-controls {
+.sort-controls {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -24,7 +24,7 @@
 }
 
 @media (max-width: 768px) {
-  .block-sort-controls {
+  .sort-controls {
     gap: 6px;
     margin-bottom: 12px;
     padding-bottom: 10px;

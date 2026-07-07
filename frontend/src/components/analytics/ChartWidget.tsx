@@ -1,30 +1,21 @@
 import { Column, Pie } from '@ant-design/plots';
-import { Card, Empty, Skeleton } from 'antd';
+import { Card, Empty } from 'antd';
 import type { ChartPoint } from '@/types/dashboardApi';
 import { useThemeMode } from '@/hooks/useThemeMode';
 
 interface Props {
   title: string;
   data: ChartPoint[];
-  loading?: boolean;
   variant?: 'column' | 'pie';
   height?: number;
 }
 
-export function ChartWidget({
-  title,
-  data,
-  loading = false,
-  variant = 'column',
-  height = 280,
-}: Props) {
+export function ChartWidget({ title, data, variant = 'column', height = 280 }: Props) {
   const { isDark } = useThemeMode();
 
   return (
     <Card title={title} styles={{ body: { minHeight: height } }}>
-      {loading ? (
-        <Skeleton active paragraph={{ rows: 6 }} />
-      ) : data.length === 0 ? (
+      {data.length === 0 ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Нет данных" />
       ) : variant === 'pie' ? (
         <Pie
@@ -66,18 +57,15 @@ export function ChartWidget({
 interface GroupedProps {
   title: string;
   data: Array<{ label: string; type: string; value: number }>;
-  loading?: boolean;
   height?: number;
 }
 
-export function GroupedChartWidget({ title, data, loading = false, height = 300 }: GroupedProps) {
+export function GroupedChartWidget({ title, data, height = 300 }: GroupedProps) {
   const { isDark } = useThemeMode();
 
   return (
     <Card title={title} styles={{ body: { minHeight: height } }}>
-      {loading ? (
-        <Skeleton active paragraph={{ rows: 6 }} />
-      ) : data.length === 0 ? (
+      {data.length === 0 ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Нет данных" />
       ) : (
         <Column

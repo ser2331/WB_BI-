@@ -3,7 +3,7 @@ import io
 import json
 import re
 from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from app.schemas.dashboard_data import (
@@ -12,8 +12,8 @@ from app.schemas.dashboard_data import (
     Period,
     ProductCard,
     SummaryRow,
+    _coerce_optional_float,
 )
-from app.utils.wb_photo import normalize_dataset_photos
 
 HEADER_ALIASES: dict[str, list[str]] = {
     "nm": ["nm", "nm_id", "nmid", "sku", "sku_wb", "артикул_wb"],
@@ -61,15 +61,7 @@ def _map_row(raw: dict[str, Any]) -> dict[str, Any]:
 
 
 def _to_float(value: Any) -> float | None:
-    from app.schemas.dashboard_data import _coerce_optional_float
-
     return _coerce_optional_float(value)
-
-
-def _to_int(value: Any) -> int | None:
-    f = _to_float(value)
-    return int(f) if f is not None else None
-
 
 def _product_from_mapped(m: dict[str, Any]) -> ProductCard | None:
     nm = m.get("nm")
@@ -129,8 +121,6 @@ def _build_blocks_from_products(
             meta.get("periodStart"),
             meta.get("periodEnd"),
         )
-        if hasattr(p, "model_dump"):
-            pass
         groups[(period_key, subject, str(group_key))].append(p)
 
     blocks: list[GlueBlock] = []
@@ -222,10 +212,6 @@ def _build_summary(blocks: list[GlueBlock]) -> list[SummaryRow]:
     return summary
 
 
-def _normalize_photos(dataset: DashboardDataset) -> DashboardDataset:
-    return normalize_dataset_photos(dataset)
-
-
 def _enrich_dataset(dataset: DashboardDataset) -> DashboardDataset:
     if not dataset.periods and dataset.blocks:
         period_map: dict[str, Period] = {}
@@ -256,7 +242,7 @@ def _enrich_dataset(dataset: DashboardDataset) -> DashboardDataset:
     if not dataset.summaryRows and dataset.blocks:
         dataset.summaryRows = _build_summary(dataset.blocks)
 
-    return _normalize_photos(dataset)
+    return dataset
 
 
 def parse_json_content(content: bytes) -> DashboardDataset:
@@ -309,7 +295,6 @@ def parse_csv_content(content: bytes) -> DashboardDataset:
     if not reader.fieldnames:
         raise ValueError("CSV пустой или без заголовка")
 
-    products: list[ProductCard] = []
     meta: dict[str, Any] = {}
     rows_by_block: dict[tuple[str, str, str], list[ProductCard]] = defaultdict(list)
     block_meta: dict[tuple[str, str, str], dict[str, Any]] = {}
@@ -350,9 +335,8 @@ def parse_csv_content(content: bytes) -> DashboardDataset:
             "title": title,
             "groupKey": group_key,
         }
-        products.append(product)
 
-    if not products:
+    if not rows_by_block:
         raise ValueError("В CSV не найдено строк с артикулом WB (колонка nm/sku)")
 
     blocks: list[GlueBlock] = []
@@ -404,6 +388,6 @@ def parse_upload(file_name: str, content: bytes) -> DashboardDataset:
     else:
         raise ValueError("Поддерживаются только файлы .csv и .json")
 
-    dataset.importedAt = datetime.utcnow()
+    dataset.importedAt = datetime.now(UTC)
     dataset.fileName = file_name
     return dataset
