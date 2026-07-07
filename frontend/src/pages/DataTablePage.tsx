@@ -233,15 +233,16 @@ export function DataTablePage() {
 
       <section className={layoutClass.dashboardSection}>
         <Card
+          className={layoutClass.blocksCard}
           title={`Все товары (${data?.total ?? 0})`}
           extra={
             <Button
+              size="small"
               icon={<DownloadOutlined />}
               loading={exporting}
               onClick={() => void handleExport()}
-              size={isMobile ? 'small' : 'middle'}
             >
-              {isMobile ? 'CSV' : 'Экспорт CSV'}
+              Экспорт CSV
             </Button>
           }
         >

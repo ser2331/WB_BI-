@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
-import { Button, Select, Space, Typography } from 'antd';
+import { Button, Select, Typography } from 'antd';
+import './block-sort-controls.scss';
 
 export type ProductSortField = 'orders' | 'sales' | 'stock' | 'nm' | 'subject' | 'brand';
 
@@ -20,9 +21,16 @@ interface Props {
   sortDir: SortDirection;
   onSortByChange: (field: ProductSortField) => void;
   onSortDirToggle: () => void;
+  className?: string;
 }
 
-export function ProductSortControls({ sortBy, sortDir, onSortByChange, onSortDirToggle }: Props) {
+export function ProductSortControls({
+  sortBy,
+  sortDir,
+  onSortByChange,
+  onSortDirToggle,
+  className,
+}: Props) {
   const field = (
     SORT_OPTIONS.some((o) => o.value === sortBy) ? sortBy : 'orders'
   ) as ProductSortField;
@@ -31,23 +39,28 @@ export function ProductSortControls({ sortBy, sortDir, onSortByChange, onSortDir
     [sortDir]
   );
 
+  const rootClass = ['block-sort-controls', className].filter(Boolean).join(' ');
+
   return (
-    <Space wrap size="small" style={{ marginBottom: 12 }}>
-      <Typography.Text type="secondary">Сортировка</Typography.Text>
+    <div className={rootClass}>
+      <Typography.Text type="secondary" className="block-sort-controls__label">
+        Сортировка
+      </Typography.Text>
       <Select
         size="small"
-        style={{ minWidth: 132 }}
+        className="block-sort-controls__field"
         value={field}
         onChange={onSortByChange}
         options={SORT_OPTIONS}
       />
       <Button
         size="small"
+        className="block-sort-controls__dir"
         icon={sortDir === 'desc' ? <SortDescendingOutlined /> : <SortAscendingOutlined />}
         onClick={onSortDirToggle}
       >
-        {dirLabel}
+        <span className="block-sort-controls__dir-text">{dirLabel}</span>
       </Button>
-    </Space>
+    </div>
   );
 }
