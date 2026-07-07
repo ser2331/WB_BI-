@@ -4,11 +4,26 @@ import { METRIC_HINTS } from '@/constants/metricHints';
 import { MetricLabel } from '@/components/ui/MetricLabel';
 import { fmtNum, fmtPct } from '@/utils/format';
 import { ProductImage } from './ProductImage';
-import { Card, Col, Row, Space, Statistic, Tag, Typography } from 'antd';
+import { Card, Space, Tag, Typography } from 'antd';
+import './product-card.scss';
 
 interface Props {
   product: ProductCardType;
 }
+
+const METRICS: {
+  key: keyof Pick<ProductCardType, 'orders' | 'sales' | 'stock' | 'spp' | 'kvv' | 'ad_ctr'>;
+  label: string;
+  hint: string;
+  percent?: boolean;
+}[] = [
+  { key: 'orders', label: 'Заказано', hint: METRIC_HINTS.orders },
+  { key: 'sales', label: 'Продано', hint: METRIC_HINTS.sales },
+  { key: 'stock', label: 'Остаток', hint: METRIC_HINTS.stock },
+  { key: 'spp', label: 'СПП', hint: METRIC_HINTS.spp, percent: true },
+  { key: 'kvv', label: 'КВВ', hint: METRIC_HINTS.kvv, percent: true },
+  { key: 'ad_ctr', label: 'CTR', hint: METRIC_HINTS.ad_ctr, percent: true },
+];
 
 export const ProductCard = memo(function ProductCard({ product }: Props) {
   const url = product.wbUrl || `https://www.wildberries.ru/catalog/${product.nm}/detail.aspx`;
@@ -16,68 +31,47 @@ export const ProductCard = memo(function ProductCard({ product }: Props) {
   return (
     <Card
       hoverable
-      style={{ width: 220, minWidth: 220, flex: '0 0 auto', scrollSnapAlign: 'start' }}
-      styles={{ body: { padding: 12 } }}
-      cover={<ProductImage nm={product.nm} photo={product.photo} />}
+      className="product-card"
+      cover={
+        <div className="product-card__image">
+          <ProductImage nm={product.nm} photo={product.photo} />
+        </div>
+      }
     >
-      <Typography.Link href={url} target="_blank" rel="noreferrer" strong>
+      <Typography.Link
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        strong
+        className="product-card__sku"
+      >
         SKU {product.nm}
       </Typography.Link>
 
-      <Typography.Paragraph type="secondary" style={{ margin: '4px 0 10px', fontSize: 12 }}>
+      <Typography.Paragraph type="secondary" className="product-card__meta">
         {product.vendorCode || '—'}
         {product.brand ? ` · ${product.brand}` : ''}
       </Typography.Paragraph>
 
-      <Space size={[4, 4]} wrap style={{ marginBottom: 10 }}>
+      <Space size={[4, 4]} wrap className="product-card__tags">
         {product.subject ? <Tag>{product.subject}</Tag> : null}
         {product.brand ? <Tag color="processing">{product.brand}</Tag> : null}
       </Space>
 
-      <Row gutter={[8, 8]}>
-        <Col span={12}>
-          <Statistic
-            title={<MetricLabel label="Заказано" hint={METRIC_HINTS.orders} />}
-            value={fmtNum(product.orders)}
-            valueStyle={{ fontSize: 14 }}
-          />
-        </Col>
-        <Col span={12}>
-          <Statistic
-            title={<MetricLabel label="Продано" hint={METRIC_HINTS.sales} />}
-            value={fmtNum(product.sales)}
-            valueStyle={{ fontSize: 14 }}
-          />
-        </Col>
-        <Col span={12}>
-          <Statistic
-            title={<MetricLabel label="Остаток" hint={METRIC_HINTS.stock} />}
-            value={fmtNum(product.stock)}
-            valueStyle={{ fontSize: 14 }}
-          />
-        </Col>
-        <Col span={12}>
-          <Statistic
-            title={<MetricLabel label="СПП" hint={METRIC_HINTS.spp} />}
-            value={fmtPct(product.spp)}
-            valueStyle={{ fontSize: 14 }}
-          />
-        </Col>
-        <Col span={12}>
-          <Statistic
-            title={<MetricLabel label="КВВ" hint={METRIC_HINTS.kvv} />}
-            value={fmtPct(product.kvv)}
-            valueStyle={{ fontSize: 14 }}
-          />
-        </Col>
-        <Col span={12}>
-          <Statistic
-            title={<MetricLabel label="CTR" hint={METRIC_HINTS.ad_ctr} />}
-            value={fmtPct(product.ad_ctr)}
-            valueStyle={{ fontSize: 14 }}
-          />
-        </Col>
-      </Row>
+      <div className="product-card__metrics">
+        {METRICS.map((metric) => {
+          const value = product[metric.key];
+          const formatted = metric.percent ? fmtPct(value) : fmtNum(value);
+          return (
+            <div key={metric.key} className="product-card__metric">
+              <span className="product-card__metric-label">
+                <MetricLabel label={metric.label} hint={metric.hint} />
+              </span>
+              <span className="product-card__metric-value">{formatted}</span>
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 });
