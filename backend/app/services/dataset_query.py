@@ -2,7 +2,13 @@ from dataclasses import dataclass
 from math import ceil
 from typing import TypeVar
 
-from app.schemas.dashboard_api import CategorySummary, ChartPoint, DashboardKpis, OrdersSalesPoint, ProductTableRow
+from app.schemas.dashboard_api import (
+    CategorySummary,
+    ChartPoint,
+    DashboardKpis,
+    OrdersSalesPoint,
+    ProductTableRow,
+)
 from app.schemas.dashboard_data import DashboardDataset, GlueBlock
 
 T = TypeVar("T")
@@ -122,7 +128,11 @@ def paginate_list(items: list[T], page: int, page_size: int) -> tuple[list[T], i
 TOP_CHART_ITEMS = 12
 
 
-def _top_chart_points(items: list[CategorySummary], field: str, limit: int = TOP_CHART_ITEMS) -> list[ChartPoint]:
+def _top_chart_points(
+    items: list[CategorySummary],
+    field: str,
+    limit: int = TOP_CHART_ITEMS,
+) -> list[ChartPoint]:
     sorted_items = sorted(items, key=lambda row: getattr(row, field), reverse=True)[:limit]
     return [ChartPoint(label=row.subject, value=float(getattr(row, field))) for row in sorted_items]
 
@@ -146,7 +156,10 @@ def aggregate_top_brands(blocks: list[GlueBlock], limit: int = TOP_CHART_ITEMS) 
     return sorted(points, key=lambda point: point.value, reverse=True)[:limit]
 
 
-def build_orders_vs_sales(categories: list[CategorySummary], limit: int = TOP_CHART_ITEMS) -> list[OrdersSalesPoint]:
+def build_orders_vs_sales(
+    categories: list[CategorySummary],
+    limit: int = TOP_CHART_ITEMS,
+) -> list[OrdersSalesPoint]:
     top = sorted(categories, key=lambda row: row.orders, reverse=True)[:limit]
     return [
         OrdersSalesPoint(label=row.subject, orders=row.orders, sales=row.sales)
