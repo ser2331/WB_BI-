@@ -182,26 +182,22 @@ export function CategoryDetailPage() {
           className={layoutClass.blocksCard}
           title={`Склейки (${data?.total ?? 0})`}
           extra={
-            <div className={layoutClass.cardToolbar}>
-              <BlockSortControls
-                className="card-toolbar__sort"
-                sortBy={blockSortBy}
-                sortDir={blockSortDir}
-                onSortByChange={setBlockSortBy}
-                onSortDirToggle={() => setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))}
-              />
-              <Button
-                className="card-toolbar__export"
-                size="small"
-                icon={<DownloadOutlined />}
-                loading={exporting}
-                onClick={() => void handleExport()}
-              >
-                Экспорт CSV
-              </Button>
-            </div>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              loading={exporting}
+              onClick={() => void handleExport()}
+            >
+              Экспорт CSV
+            </Button>
           }
         >
+          <BlockSortControls
+            sortBy={blockSortBy}
+            sortDir={blockSortDir}
+            onSortByChange={setBlockSortBy}
+            onSortDirToggle={() => setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))}
+          />
           {!data?.items.length ? (
             <Empty description="По фильтрам склеек не найдено" />
           ) : (

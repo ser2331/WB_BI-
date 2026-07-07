@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import type { BlockSortField, SortDirection } from '@/utils/sortGlueBlocks';
-import { Button, Select, Space, Typography } from 'antd';
+import { Button, Select, Typography } from 'antd';
 import { SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
+import './block-sort-controls.scss';
 
 const SORT_OPTIONS: { value: BlockSortField; label: string }[] = [
   { value: 'orders', label: 'Заказы' },
@@ -34,24 +35,28 @@ export function BlockSortControls({
     [sortDir]
   );
 
+  const rootClass = ['block-sort-controls', className].filter(Boolean).join(' ');
+
   return (
-    <Space wrap size="small" align="center" className={className}>
-      <Typography.Text type="secondary">Сортировка</Typography.Text>
+    <div className={rootClass}>
+      <Typography.Text type="secondary" className="block-sort-controls__label">
+        Сортировка
+      </Typography.Text>
       <Select
         size="small"
-        style={{ minWidth: 120 }}
+        className="block-sort-controls__field"
         value={sortBy}
         onChange={onSortByChange}
         options={SORT_OPTIONS}
       />
       <Button
         size="small"
-        className="card-toolbar__sort-dir"
+        className="block-sort-controls__dir"
         icon={sortDir === 'desc' ? <SortDescendingOutlined /> : <SortAscendingOutlined />}
         onClick={onSortDirToggle}
       >
-        <span className="card-toolbar__sort-dir-text">{dirLabel}</span>
+        <span className="block-sort-controls__dir-text">{dirLabel}</span>
       </Button>
-    </Space>
+    </div>
   );
 }
