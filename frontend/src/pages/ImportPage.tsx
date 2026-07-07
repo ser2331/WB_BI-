@@ -102,7 +102,12 @@ export function ImportPage() {
         </Upload.Dragger>
 
         <Space wrap style={{ marginTop: 16 }}>
-          <Button type="primary" onClick={handleUpload} loading={importing} disabled={!selectedFile}>
+          <Button
+            type="primary"
+            onClick={handleUpload}
+            loading={importing}
+            disabled={!selectedFile}
+          >
             Загрузить и обработать
           </Button>
           <Button danger onClick={handleClear} loading={clearing}>

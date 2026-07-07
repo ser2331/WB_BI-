@@ -118,7 +118,10 @@ export const DashboardFilters = memo(function DashboardFilters({
 
           {hasActive ? (
             <Col span={24}>
-              <Button type="link" onClick={() => onChange({ periodKey: '', subject: '', brand: '', search: '' })}>
+              <Button
+                type="link"
+                onClick={() => onChange({ periodKey: '', subject: '', brand: '', search: '' })}
+              >
                 Сбросить фильтры
               </Button>
             </Col>

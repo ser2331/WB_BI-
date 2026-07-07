@@ -35,9 +35,7 @@ export type CategoryBlocksQueryArgs = Omit<DashboardQueryParams, 'subject'> & {
   subject: string;
 };
 
-function buildParams(
-  params: Record<string, string | number | undefined>
-): Record<string, string> {
+function buildParams(params: Record<string, string | number | undefined>): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== '') out[key] = String(value);

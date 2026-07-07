@@ -130,10 +130,16 @@ export function AnalyticsPage() {
       <section className={layoutClass.dashboardSection}>
         <Row gutter={[16, 16]}>
           <Col xs={24} xl={12}>
-            <ChartWidget title="Заказы по предметам (топ-12)" data={charts?.orders_by_subject ?? []} />
+            <ChartWidget
+              title="Заказы по предметам (топ-12)"
+              data={charts?.orders_by_subject ?? []}
+            />
           </Col>
           <Col xs={24} xl={12}>
-            <ChartWidget title="Продажи по предметам (топ-12)" data={charts?.sales_by_subject ?? []} />
+            <ChartWidget
+              title="Продажи по предметам (топ-12)"
+              data={charts?.sales_by_subject ?? []}
+            />
           </Col>
           <Col xs={24} xl={12}>
             <GroupedChartWidget title="Заказы и продажи по предметам" data={groupedData} />

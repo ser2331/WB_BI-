@@ -87,7 +87,11 @@ export const ProductImage = memo(function ProductImage({ nm, photo, width = '100
           gap={8}
           style={{ width: '100%', height: '100%', color: token.colorTextSecondary }}
         >
-          {isFetching ? <Skeleton.Avatar active size="large" shape="square" /> : <PictureOutlined />}
+          {isFetching ? (
+            <Skeleton.Avatar active size="large" shape="square" />
+          ) : (
+            <PictureOutlined />
+          )}
           <span style={{ fontSize: 12 }}>{isFetching ? 'Загрузка…' : 'Нет фото'}</span>
         </Flex>
       ) : (

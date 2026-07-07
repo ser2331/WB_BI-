@@ -34,7 +34,11 @@ export const ProductCard = memo(function ProductCard({ product }: Props) {
 
       <Row gutter={[8, 8]}>
         <Col span={12}>
-          <Statistic title="Заказано" value={fmtNum(product.orders)} valueStyle={{ fontSize: 14 }} />
+          <Statistic
+            title="Заказано"
+            value={fmtNum(product.orders)}
+            valueStyle={{ fontSize: 14 }}
+          />
         </Col>
         <Col span={12}>
           <Statistic title="Продано" value={fmtNum(product.sales)} valueStyle={{ fontSize: 14 }} />

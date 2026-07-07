@@ -33,7 +33,13 @@ function loadSiderCollapsed(): boolean {
 }
 
 const allNavItems = [
-  { key: '/', label: 'Категории', icon: <TableOutlined />, shortTitle: 'Категории', adminOnly: false },
+  {
+    key: '/',
+    label: 'Категории',
+    icon: <TableOutlined />,
+    shortTitle: 'Категории',
+    adminOnly: false,
+  },
   {
     key: '/analytics',
     label: 'Дашборд',
@@ -147,7 +153,9 @@ export function Layout() {
 
           <Space wrap align="center">
             <Space size={8}>
-              <SunOutlined style={{ color: isDark ? token.colorTextSecondary : token.colorPrimary }} />
+              <SunOutlined
+                style={{ color: isDark ? token.colorTextSecondary : token.colorPrimary }}
+              />
               <Switch
                 checked={isDark}
                 onChange={(checked) => setMode(checked ? 'dark' : 'light')}
@@ -155,7 +163,9 @@ export function Layout() {
                 unCheckedChildren={<SunOutlined />}
                 aria-label="Переключить тему"
               />
-              <MoonOutlined style={{ color: isDark ? token.colorPrimary : token.colorTextSecondary }} />
+              <MoonOutlined
+                style={{ color: isDark ? token.colorPrimary : token.colorTextSecondary }}
+              />
             </Space>
 
             {user ? (

@@ -161,10 +161,7 @@ def build_orders_vs_sales(
     limit: int = TOP_CHART_ITEMS,
 ) -> list[OrdersSalesPoint]:
     top = sorted(categories, key=lambda row: row.orders, reverse=True)[:limit]
-    return [
-        OrdersSalesPoint(label=row.subject, orders=row.orders, sales=row.sales)
-        for row in top
-    ]
+    return [OrdersSalesPoint(label=row.subject, orders=row.orders, sales=row.sales) for row in top]
 
 
 def build_dashboard_charts(blocks: list[GlueBlock], dataset: DashboardDataset) -> dict:

@@ -19,7 +19,12 @@ export function PageSkeleton({ title, rows = 3 }: Props) {
 export function RouteFallback() {
   return (
     <Flex align="center" justify="center" style={{ minHeight: '40vh', padding: 24 }}>
-      <Space direction="vertical" align="center" size="large" style={{ width: '100%', maxWidth: 640 }}>
+      <Space
+        direction="vertical"
+        align="center"
+        size="large"
+        style={{ width: '100%', maxWidth: 640 }}
+      >
         <Skeleton.Input active size="large" style={{ width: 200 }} />
         <Card style={{ width: '100%' }}>
           <Skeleton active paragraph={{ rows: 4 }} />

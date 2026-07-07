@@ -110,11 +110,7 @@ export function DataTablePage() {
         key: 'stock',
         sorter: true,
         sortOrder:
-          params.sortBy === 'stock'
-            ? params.sortDir === 'asc'
-              ? 'ascend'
-              : 'descend'
-            : undefined,
+          params.sortBy === 'stock' ? (params.sortDir === 'asc' ? 'ascend' : 'descend') : undefined,
         render: (value: number | null) => fmtNum(value),
       },
       {
