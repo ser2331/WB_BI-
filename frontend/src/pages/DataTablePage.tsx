@@ -8,6 +8,12 @@ import {
 } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
+import {
+  ProductSortControls,
+  type ProductSortField,
+} from '@/components/dashboard/ProductSortControls';
+import { ProductTableCard } from '@/components/dashboard/ProductTableCard';
+import './product-table-card.scss';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
@@ -20,6 +26,7 @@ import {
 import { fetchAllProducts } from '@/utils/fetchAllPages';
 import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { fmtNum, fmtPct } from '@/utils/format';
 import type { ProductTableRow } from '@/types/dashboardApi';
 import { Button, Card, Empty, Table, Typography } from 'antd';
@@ -31,6 +38,7 @@ function rowKey(row: ProductTableRow) {
 
 export function DataTablePage() {
   const { message } = App.useApp();
+  const isMobile = useIsMobile();
   const [exporting, setExporting] = useState(false);
   const { params, apiQuery, setParams } = useDashboardParams(25);
 
@@ -158,6 +166,14 @@ export function DataTablePage() {
     }
   };
 
+  const handleMobileSortBy = (field: ProductSortField) => {
+    setParams({ sortBy: field, page: 1 }, true);
+  };
+
+  const handleMobileSortDirToggle = () => {
+    setParams({ sortDir: params.sortDir === 'desc' ? 'asc' : 'desc', page: 1 }, true);
+  };
+
   if (loading) {
     return (
       <div className={layoutClass.dashboardRoot}>
@@ -173,6 +189,8 @@ export function DataTablePage() {
       </div>
     );
   }
+
+  const items = data?.items ?? [];
 
   return (
     <PageOverlay className={layoutClass.dashboardRoot} busy={busy} error={error || null}>
@@ -222,32 +240,53 @@ export function DataTablePage() {
               icon={<DownloadOutlined />}
               loading={exporting}
               onClick={() => void handleExport()}
+              size={isMobile ? 'small' : 'middle'}
             >
-              Экспорт CSV
+              {isMobile ? 'CSV' : 'Экспорт CSV'}
             </Button>
           }
         >
-          <Table<ProductTableRow>
-            rowKey={rowKey}
-            size="middle"
-            scroll={{ x: 1200 }}
-            columns={columns}
-            dataSource={data?.items ?? []}
-            pagination={false}
-            locale={{ emptyText: <Empty description="По фильтрам товары не найдены" /> }}
-            onChange={(_pagination, _filters, sorter) => {
-              const entry = Array.isArray(sorter) ? sorter[0] : sorter;
-              if (!entry?.field || !entry.order) return;
-              setParams(
-                {
-                  sortBy: String(entry.field),
-                  sortDir: entry.order === 'ascend' ? 'asc' : 'desc',
-                  page: 1,
-                },
-                true
-              );
-            }}
-          />
+          {isMobile ? (
+            <>
+              <ProductSortControls
+                sortBy={params.sortBy}
+                sortDir={params.sortDir}
+                onSortByChange={handleMobileSortBy}
+                onSortDirToggle={handleMobileSortDirToggle}
+              />
+              {!items.length ? (
+                <Empty description="По фильтрам товары не найдены" />
+              ) : (
+                <div className="product-table-list">
+                  {items.map((row) => (
+                    <ProductTableCard key={rowKey(row)} row={row} />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <Table<ProductTableRow>
+              rowKey={rowKey}
+              size="middle"
+              scroll={{ x: 1200 }}
+              columns={columns}
+              dataSource={items}
+              pagination={false}
+              locale={{ emptyText: <Empty description="По фильтрам товары не найдены" /> }}
+              onChange={(_pagination, _filters, sorter) => {
+                const entry = Array.isArray(sorter) ? sorter[0] : sorter;
+                if (!entry?.field || !entry.order) return;
+                setParams(
+                  {
+                    sortBy: String(entry.field),
+                    sortDir: entry.order === 'ascend' ? 'asc' : 'desc',
+                    page: 1,
+                  },
+                  true
+                );
+              }}
+            />
+          )}
         </Card>
       </section>
     </PageOverlay>
