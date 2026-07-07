@@ -13,7 +13,6 @@ import {
   type ProductSortField,
 } from '@/components/dashboard/ProductSortControls';
 import { ProductTableCard } from '@/components/dashboard/ProductTableCard';
-import './product-table-card.scss';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
 import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
