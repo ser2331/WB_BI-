@@ -1,7 +1,7 @@
 import type { CsvColumn } from '@/utils/exportCsv';
 import type { CategorySummary, ProductTableRow } from '@/types/dashboardApi';
 import type { GlueBlock } from '@/types/dashboard';
-import { fmtNum, fmtPct } from '@/utils/format';
+import { fmtPct } from '@/utils/format';
 
 export const PRODUCT_EXPORT_COLUMNS: CsvColumn<ProductTableRow>[] = [
   { header: 'SKU', value: (r) => r.nm },
@@ -26,7 +26,7 @@ export const CATEGORY_EXPORT_COLUMNS: CsvColumn<CategorySummary>[] = [
   { header: 'Остаток', value: (r) => r.stock },
 ];
 
-export interface BlockExportRow {
+interface BlockExportRow {
   subject: string;
   glue_title: string;
   period_label: string | null | undefined;
@@ -108,8 +108,4 @@ export const BLOCK_EXPORT_COLUMNS: CsvColumn<BlockExportRow>[] = [
 export function formatExportFilename(prefix: string): string {
   const stamp = new Date().toISOString().slice(0, 10);
   return `${prefix}_${stamp}.csv`;
-}
-
-export function formatCountLabel(count: number): string {
-  return fmtNum(count);
 }

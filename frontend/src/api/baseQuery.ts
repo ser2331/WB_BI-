@@ -3,7 +3,7 @@ import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { AUTH_STORAGE_KEY } from '@/store/authSlice';
 
 const API_HOST = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-export const API_BASE_URL = API_HOST ? `${API_HOST}/api` : '/api';
+const API_BASE_URL = API_HOST ? `${API_HOST}/api` : '/api';
 
 function readStoredToken(): string | null {
   try {

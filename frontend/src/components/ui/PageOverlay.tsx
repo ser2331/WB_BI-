@@ -8,7 +8,6 @@ interface Props {
   busy?: boolean;
   busyText?: string;
   error?: string | null;
-  success?: string | null;
 }
 
 export function PageOverlay({
@@ -17,7 +16,6 @@ export function PageOverlay({
   busy = false,
   busyText = 'Обновление…',
   error,
-  success,
 }: Props) {
   const shellClass = ['page-overlay-shell', className].filter(Boolean).join(' ');
 
@@ -36,11 +34,6 @@ export function PageOverlay({
       {error ? (
         <div className="page-overlay page-overlay--error" role="alert">
           <Alert className="page-overlay__alert" type="error" message={error} showIcon />
-        </div>
-      ) : null}
-      {success ? (
-        <div className="page-overlay page-overlay--error" role="status">
-          <Alert className="page-overlay__alert" type="success" message={success} showIcon />
         </div>
       ) : null}
     </div>

@@ -13,7 +13,7 @@ import {
 import { Button, Layout as AntLayout, Menu, Switch, Tag, Typography, theme } from 'antd';
 import { NavLink as RouterNavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { wbApi } from '@/api/wbApi';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { layoutClass } from '@/components/layout/app-layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useThemeMode } from '@/hooks/useThemeMode';
 import { useAppDispatch } from '@/store/hooks';

@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import type { FilterOptions } from '@/types/dashboardApi';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { layoutClass } from '@/components/layout/app-layout';
 import { Button, Card, Col, Input, Pagination, Row, Select, Space, Typography } from 'antd';
 
 export interface FiltersState {

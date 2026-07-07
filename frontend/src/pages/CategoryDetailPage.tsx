@@ -1,35 +1,28 @@
 import { Link, useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { DownloadOutlined } from '@ant-design/icons';
-import { App } from 'antd';
 import { buildQueryString } from '@/types/dashboardApi';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
+import { useCsvExport } from '@/hooks/useCsvExport';
 import {
   useGetCategoryBlocksQuery,
   useGetDashboardFiltersQuery,
   useGetDashboardMetaQuery,
 } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
-import { BlockSortControls } from '@/components/dashboard/BlockSortControls';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
-import { GlueBlocksList } from '@/components/dashboard/GlueBlock';
+import { GlueBlocksList } from '@/components/dashboard/GlueBlocksList';
 import { HeroSection } from '@/components/dashboard/HeroSection';
-import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { BLOCK_SORT_OPTIONS, SortControls } from '@/components/dashboard/SortControls';
+import { layoutClass } from '@/components/layout/app-layout';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
-import {
-  BLOCK_EXPORT_COLUMNS,
-  flattenBlocksForExport,
-  formatCountLabel,
-  formatExportFilename,
-} from '@/constants/exportColumns';
+import { BLOCK_EXPORT_COLUMNS, flattenBlocksForExport } from '@/constants/exportColumns';
 import { fetchAllBlocks } from '@/utils/fetchAllPages';
-import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
 import { sortGlueBlocks, type BlockSortField, type SortDirection } from '@/utils/sortGlueBlocks';
 import { Button, Card, Empty, Space } from 'antd';
 
 export function CategoryDetailPage() {
-  const { message } = App.useApp();
   const { subject: subjectParam } = useParams<{ subject: string }>();
   const subject = useMemo(
     () => (subjectParam ? decodeURIComponent(subjectParam) : ''),
@@ -38,7 +31,7 @@ export function CategoryDetailPage() {
   const { params, apiQuery, setParams } = useDashboardParams(10);
   const [blockSortBy, setBlockSortBy] = useState<BlockSortField>('orders');
   const [blockSortDir, setBlockSortDir] = useState<SortDirection>('desc');
-  const [exporting, setExporting] = useState(false);
+  const { exporting, exportCsv } = useCsvExport();
 
   const blocksQuery = useMemo(
     () => ({
@@ -82,31 +75,23 @@ export function CategoryDetailPage() {
   const error = getErrorMessage(metaError ?? filtersError ?? blocksError, '');
   const busy = Boolean(subject) && blocksFetching && !blocksLoading;
 
-  const handleExport = async () => {
+  const handleExport = () => {
     if (!subject) return;
-    setExporting(true);
-    try {
-      const blocks = await fetchAllBlocks({
-        subject,
-        periodKey: apiQuery.periodKey,
-        brand: apiQuery.brand,
-        search: apiQuery.search,
-      });
-      const rows = flattenBlocksForExport(blocks, subject);
-      if (!rows.length) {
-        message.warning('Нет данных для экспорта');
-        return;
-      }
-      downloadCsv(
-        formatExportFilename(`blocks_${subject.replace(/[^\wа-яА-Я-]+/gi, '_')}`),
-        rowsToCsv(rows, BLOCK_EXPORT_COLUMNS)
-      );
-      message.success(`Экспортировано ${formatCountLabel(rows.length)} строк`);
-    } catch {
-      message.error('Не удалось экспортировать данные');
-    } finally {
-      setExporting(false);
-    }
+    const safeSubject = subject.replace(/[^\wа-яА-Я-]+/gi, '_');
+    void exportCsv({
+      fetchRows: async () => {
+        const blocks = await fetchAllBlocks({
+          subject,
+          periodKey: apiQuery.periodKey,
+          brand: apiQuery.brand,
+          search: apiQuery.search,
+        });
+        return flattenBlocksForExport(blocks, subject);
+      },
+      columns: BLOCK_EXPORT_COLUMNS,
+      filenamePrefix: `blocks_${safeSubject}`,
+      itemLabel: 'строк',
+    });
   };
 
   if (!subject) {
@@ -179,22 +164,24 @@ export function CategoryDetailPage() {
 
       <section className={layoutClass.dashboardSection} id="blocks">
         <Card
-          className={layoutClass.blocksCard}
+          className={layoutClass.dashboardCard}
           title={`Склейки (${data?.total ?? 0})`}
           extra={
             <Button
               size="small"
               icon={<DownloadOutlined />}
               loading={exporting}
-              onClick={() => void handleExport()}
+              onClick={handleExport}
             >
               Экспорт CSV
             </Button>
           }
         >
-          <BlockSortControls
+          <SortControls
             sortBy={blockSortBy}
             sortDir={blockSortDir}
+            options={[...BLOCK_SORT_OPTIONS]}
+            defaultField="orders"
             onSortByChange={setBlockSortBy}
             onSortDirToggle={() => setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))}
           />
