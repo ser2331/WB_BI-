@@ -3,8 +3,9 @@ import { media } from '@/styles/breakpoints';
 
 export const AppShell = styled.div`
   display: flex;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 
   ${media.mobile} {
     flex-direction: column;
@@ -13,12 +14,14 @@ export const AppShell = styled.div`
 
 export const Sidebar = styled.aside`
   width: 240px;
+  height: 100%;
   background: var(--color-bg-secondary);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
   flex-shrink: 0;
+  overflow: hidden;
 
   ${media.mobile} {
     display: none;
@@ -112,10 +115,8 @@ export const Main = styled.main`
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-
-  ${media.mobile} {
-    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  }
+  min-height: 0;
+  height: 100%;
 `;
 
 export const Header = styled.header`
@@ -144,65 +145,32 @@ export const PageTitle = styled.h1`
   }
 `;
 
-export const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  min-width: 0;
-
-  ${media.mobile} {
-    gap: 8px;
-    max-width: 100%;
-  }
-`;
-
 export const Content = styled.div`
   flex: 1;
-  padding: 24px 32px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+export const PageScroll = styled.div`
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 24px 32px;
   -webkit-overflow-scrolling: touch;
 
   ${media.mobile} {
     padding: 16px;
+    padding-bottom: calc(16px + 68px + env(safe-area-inset-bottom, 0px));
   }
 `;
 
-export const StatusBadge = styled.span<{ $connected?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  background: ${({ $connected }) =>
-    $connected ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)'};
-  color: ${({ $connected }) =>
-    $connected ? 'var(--color-success)' : 'var(--color-danger)'};
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  ${media.mobile} {
-    max-width: 140px;
-    font-size: 11px;
-    padding: 4px 10px;
-  }
-
-  &::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    flex-shrink: 0;
-  }
-`;
-
-export const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger'; $fullWidth?: boolean }>`
+export const Button = styled.button<{
+  $variant?: 'primary' | 'secondary' | 'danger';
+  $fullWidth?: boolean;
+}>`
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 14px;
@@ -250,68 +218,4 @@ export const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'dang
         `;
     }
   }}
-`;
-
-export const Card = styled.div`
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 20px;
-
-  ${media.mobile} {
-    padding: 16px;
-    border-radius: 10px;
-  }
-`;
-
-export const CardTitle = styled.h3`
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  margin-bottom: 16px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  ${media.mobile} {
-    font-size: 12px;
-    margin-bottom: 12px;
-  }
-`;
-
-export const Grid = styled.div<{ $cols?: number }>`
-  display: grid;
-  grid-template-columns: repeat(${({ $cols }) => $cols ?? 4}, 1fr);
-  gap: 16px;
-
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  ${media.mobile} {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  ${media.smallMobile} {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const WidgetGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-
-  ${media.mobile} {
-    gap: 12px;
-  }
-`;
-
-export const Widget = styled(Card)<{ $colSpan?: number }>`
-  grid-column: span ${({ $colSpan }) => $colSpan ?? 6};
-  min-width: 0;
-
-  @media (max-width: 1024px) {
-    grid-column: span 12;
-  }
 `;

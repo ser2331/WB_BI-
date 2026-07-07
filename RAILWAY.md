@@ -14,10 +14,10 @@
 2. Выбери репозиторий **WB_BI**
 3. Railway создаст серvice — сразу открой его **Settings**:
 
-| Параметр | Значение |
-|----------|----------|
-| **Root Directory** | `backend` |
-| **Watch Paths** | `backend/**` (опционально) |
+| Параметр           | Значение                   |
+| ------------------ | -------------------------- |
+| **Root Directory** | `backend`                  |
+| **Watch Paths**    | `backend/**` (опционально) |
 
 4. Дождись успешного **Deploy** (зелёный статус в Deployments).
 
@@ -26,21 +26,23 @@
    ### ✅ Правильно: сгенерировать домен Railway
 
    Нажми кнопку **Generate Domain** — Railway сам создаст адрес вида:
+
    ```
    https://wb-bi-production-xxxx.up.railway.app
    ```
+
    **Ничего вручную в поле вводить не нужно.**
 
    ### ❌ Ошибка `Malformed Domain`
 
    Появляется, если в поле **Custom Domain** вставить:
 
-   | Неправильно | Почему |
-   |-------------|--------|
-   | `https://ser2331.github.io` | это GitHub Pages, не домен для Railway |
-   | `https://something.up.railway.app` | нельзя `https://` |
-   | `ser2331.github.io/WB_BI/` | нельзя путь `/WB_BI/` |
-   | `localhost:8000` | не публичный домен |
+   | Неправильно                        | Почему                                 |
+   | ---------------------------------- | -------------------------------------- |
+   | `https://ser2331.github.io`        | это GitHub Pages, не домен для Railway |
+   | `https://something.up.railway.app` | нельзя `https://`                      |
+   | `ser2331.github.io/WB_BI/`         | нельзя путь `/WB_BI/`                  |
+   | `localhost:8000`                   | не публичный домен                     |
 
    **Custom Domain** нужен только если у тебя **свой** домен (`myshop.ru`) — без `https://`, без `/`.
 
@@ -81,8 +83,8 @@ CORS_ORIGIN_REGEX=https://([a-zA-Z0-9-]+\.)?github\.io
 1. GitHub → репозиторий **WB_BI** → **Settings** → **Secrets and variables** → **Actions**
 2. **New repository secret**:
 
-| Name | Value |
-|------|-------|
+| Name           | Value                                          |
+| -------------- | ---------------------------------------------- |
 | `VITE_API_URL` | `https://ТВОЙ-URL.up.railway.app` (без `/api`) |
 
 3. **Actions** → **Deploy frontend to GitHub Pages** → **Run workflow** (или push в `main`)
@@ -102,14 +104,14 @@ cd frontend && npm run dev
 
 ## Troubleshooting
 
-| Проблема | Решение |
-|----------|---------|
-| **Malformed Domain** | Не вводи URL в Custom Domain. Используй **Generate Domain**. GitHub URL — только в `CORS_ORIGINS` |
-| Build failed | Убедись, что **Root Directory** = `backend` |
-| CORS error в браузере | Проверь `CORS_ORIGINS` = `https://ser2331.github.io` |
-| 502 / Application failed | **Deployments** → View logs, ищи ошибку Python |
-| Пустой дашборд | Нажми **Настройки → Демо без WB** или **Синхронизировать** |
-| Railway sleep | На trial/free сервис может засыпать — первый запрос ~10–30 сек |
+| Проблема                 | Решение                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Malformed Domain**     | Не вводи URL в Custom Domain. Используй **Generate Domain**. GitHub URL — только в `CORS_ORIGINS` |
+| Build failed             | Убедись, что **Root Directory** = `backend`                                                       |
+| CORS error в браузере    | Проверь `CORS_ORIGINS` = `https://ser2331.github.io`                                              |
+| 502 / Application failed | **Deployments** → View logs, ищи ошибку Python                                                    |
+| Пустой дашборд           | Нажми **Настройки → Демо без WB** или **Синхронизировать**                                        |
+| Railway sleep            | На trial/free сервис может засыпать — первый запрос ~10–30 сек                                    |
 
 ## Продакшен с реальным WB
 

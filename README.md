@@ -1,27 +1,21 @@
 # WB BI
 
-Business Intelligence приложение для продавцов Wildberries.
+Приложение для импорта данных и просмотра дашборда **склеек по предметам** (как в прототипе `dash_2`).
 
 ## Стек
 
-| Слой | Технологии |
-|------|-----------|
-| Frontend | React, TypeScript, Vite, Recharts, styled-components, SCSS |
-| Backend | Python, FastAPI, SQLAlchemy, SQLite |
-| API | Wildberries Seller API |
+| Слой     | Технологии                                       |
+| -------- | ------------------------------------------------ |
+| Frontend | React, TypeScript, Vite, styled-components, SCSS |
+| Backend  | Python, FastAPI, SQLAlchemy, SQLite              |
 
-## Возможности (MVP)
+## Возможности
 
-- Подключение WB аккаунта через API-токен
-- Настройка источников данных (продажи, заказы, остатки, воронка, регионы)
-- Умная синхронизация с учётом rate limits WB API
-- Дашборд с захардкоженными виджетами:
-  - KPI-карточки (выручка, продажи, заказы, остатки)
-  - График выручки по дням
-  - График заказов по дням
-  - Топ товаров по выручке
-  - Воронка продаж
-  - Таблица остатков на складах
+- **Импорт файлов** CSV и JSON на бэкенд
+- Обработка и нормализация данных в единую схему (склейки + карточки товаров)
+- **Дашборд** с KPI, фильтрами, сводкой по предметам и горизонтальными карточками SKU
+- JSON в формате `dash_2` (поле `blocks`) загружается напрямую
+- CSV — плоский список товаров с группировкой по `groupKey` / `title` / `imt`
 
 ## Быстрый старт
 
@@ -50,71 +44,88 @@ npm install
 npm run dev
 ```
 
-UI: http://localhost:5173
+UI: http://localhost:5173 → раздел **Импорт** → загрузите `dash_2/assets/dashboard-data.json` или CSV.
 
-## Деплой (GitHub Pages + Render)
+### Линтеры и проверка типов
+
+**Frontend** (`frontend/`):
+
+```bash
+npm run typecheck   # tsc -b (project references)
+npm run lint        # ESLint 9 + typescript-eslint
+npm run lint:fix    # автоисправления ESLint
+npm run format      # Prettier — форматирование
+npm run format:check # Prettier — проверка без записи
+```
+
+**Backend** (`backend/`):
+
+```bash
+pip install -r requirements-dev.txt
+ruff check app
+ruff format app     # форматирование
+```
+
+В CI: workflow `.github/workflows/lint.yml` (push/PR на main).
+
+## API импорта
+
+| Метод  | Путь                                         | Описание                                            |
+| ------ | -------------------------------------------- | --------------------------------------------------- |
+| POST   | `/api/import`                                | Загрузка файла (`multipart/form-data`, поле `file`) |
+| GET    | `/api/dashboard/meta`                        | Мета импорта (файл, счётчики)                       |
+| GET    | `/api/dashboard/kpis`                        | KPI: склейки, SKU, остаток (+ фильтры)              |
+| GET    | `/api/dashboard/filters`                     | Списки периодов, предметов, брендов                 |
+| GET    | `/api/dashboard/categories`                  | Категории постранично (+ фильтры)                   |
+| GET    | `/api/dashboard/categories/{subject}/blocks` | Склейки категории постранично (+ фильтры)           |
+| DELETE | `/api/import`                                | Удалить загруженные данные                          |
+
+Данные хранятся **в памяти** и в файле `backend/data/dataset.json` (без отдельной БД для датасета).
+
+Query-параметры фильтров: `periodKey`, `subject`, `brand`, `search`, `page`, `page_size`.
+
+### Формат CSV
+
+Минимум: `nm` (артикул WB). Рекомендуемые колонки: `subject`, `brand`, `vendorCode`, `orders`, `sales`, `stock`, `spp`, `kvv`, `ad_ctr`, `title`, `groupKey`, `periodKey`, `periodLabel`, `photo`, `wbUrl`.
+
+## Деплой (GitHub Pages + Railway)
 
 Пошаговая инструкция: **[DEPLOY.md](DEPLOY.md)**
 
-| Куда | Что |
-|------|-----|
-| **GitHub** | Исходный код |
-| **GitHub Pages** | Фронтенд (автодеплой через Actions) |
-| **Railway** | Бэкенд FastAPI (`backend/railway.toml`) |
+| Куда             | Что                                     |
+| ---------------- | --------------------------------------- |
+| **GitHub**       | Исходный код                            |
+| **GitHub Pages** | Фронтенд (автодеплой через Actions)     |
+| **Railway**      | Бэкенд FastAPI (`backend/railway.toml`) |
 
 После деплоя:
+
 - Pages: `https://YOUR_USERNAME.github.io/WB_BI/`
 - API: `https://your-app.up.railway.app/api/health`
 
 Подробно: **[RAILWAY.md](RAILWAY.md)**
 
-## Демо-режим (без аккаунта WB)
-
-По умолчанию в **локальном** `.env` включён mock-режим (`MOCK_WB=true` в `backend/.env.example`).
-
-При старте бэкенда автоматически:
-- создаётся **mock JWT** (формат как у WB, с флагом `mock: true` в payload);
-- генерируются **демо-данные**: продажи, заказы, остатки, воронка, регионы за 30 дней;
-- дашборд сразу заполнен.
-
-Ручное подключение:
-- UI: **Настройки → «Демо без WB»**
-- API: `POST /api/wb/connect-mock`
-- Получить JWT: `GET /api/mock/token`
-
-Для продакшена отключите: `MOCK_WB=false`, `AUTO_SEED_MOCK=false`.
-
-## Получение API-токена WB
-
-1. Войдите в [личный кабинет продавца WB](https://seller.wildberries.ru/)
-2. Настройки → Доступ к API
-3. Создайте токен с категориями **Статистика** и **Аналитика**
-4. Вставьте токен на странице «Настройки» в приложении
-
 ## Архитектура
 
 ```
 WB_BI/
+├── dash_2/               # локальный прототип (в .gitignore)
 ├── backend/
 │   ├── app/
-│   │   ├── api/          # REST endpoints
-│   │   ├── models/       # SQLAlchemy модели
-│   │   ├── schemas/      # Pydantic схемы
-│   │   └── services/     # WB клиент, синхронизация, дашборд
-│   └── requirements.txt
+│   │   ├── api/          # import + legacy WB endpoints
+│   │   ├── schemas/      # DashboardDataset
+│   │   └── services/     # file_import, dataset_memory, dataset_query
 └── frontend/
     └── src/
-        ├── api/          # HTTP клиент
-        ├── components/   # Layout + виджеты
-        ├── pages/        # Dashboard, Settings
-        └── types/        # TypeScript типы
+        ├── components/dashboard/  # карточки склеек
+        └── pages/               # Dashboard, Import
 ```
+
+Папка `dash_2/` — эталонный прототип, в git не попадает.
 
 ## Дорожная карта
 
-- [ ] Фоновая автосинхронизация по расписанию
-- [ ] Настраиваемые виджеты дашборда
-- [ ] AI-ассистент: запрос данных на естественном языке
-- [ ] Генерация временных лендингов с данными WB
-- [ ] Мультиаккаунт и роли пользователей
+- [ ] Фильтры и сортировка как в dash_2 v2+
+- [ ] История периодов по склейкам
+- [ ] Экспорт отфильтрованного отчёта
 - [ ] PostgreSQL вместо SQLite для продакшена

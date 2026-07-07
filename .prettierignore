@@ -1,0 +1,23 @@
+# VCS & tooling caches
+.git/
+**/.git/
+**/node_modules/
+**/dist/
+**/.venv/
+**/__pycache__/
+
+# Generated / large data
+**/package-lock.json
+**/dataset.json
+**/tsconfig.tsbuildinfo
+**/node_modules/.tmp/
+
+# Python (use ruff format)
+backend/
+
+# Local prototypes
+dash_2/
+
+# Lockfiles / env
+**/.env
+**/.env.*

@@ -1,7 +1,4 @@
 import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { api } from '@/api/client';
-import type { WBConnectionStatus } from '@/types/api';
 import {
   AppShell,
   Sidebar,
@@ -13,30 +10,24 @@ import {
   Main,
   Header,
   PageTitle,
-  HeaderActions,
   Content,
-  StatusBadge,
-  Button,
 } from './Layout.styles';
 
 const navItems = [
-  { to: '/', label: 'Дашборд', icon: '📊', shortTitle: 'Дашборд' },
-  { to: '/settings', label: 'Настройки', icon: '⚙️', shortTitle: 'Настройки' },
+  { to: '/', label: 'Категории', icon: '📂', shortTitle: 'Категории' },
+  { to: '/import', label: 'Импорт', icon: '📁', shortTitle: 'Импорт' },
 ];
 
 const pageTitles: Record<string, string> = {
-  '/': 'Дашборд',
-  '/settings': 'Настройки',
+  '/': 'Категории',
+  '/import': 'Импорт данных',
 };
 
 export function Layout() {
-  const [wbStatus, setWbStatus] = useState<WBConnectionStatus | null>(null);
   const location = useLocation();
-  const pageTitle = pageTitles[location.pathname] ?? 'Аналитика Wildberries';
-
-  useEffect(() => {
-    api.getWBStatus().then(setWbStatus).catch(() => null);
-  }, [location.pathname]);
+  const pageTitle = location.pathname.startsWith('/category/')
+    ? decodeURIComponent(location.pathname.replace('/category/', ''))
+    : (pageTitles[location.pathname] ?? 'WB BI');
 
   return (
     <AppShell>
@@ -60,22 +51,6 @@ export function Layout() {
       <Main>
         <Header>
           <PageTitle>{pageTitle}</PageTitle>
-          <HeaderActions>
-            {wbStatus && (
-              <StatusBadge $connected={wbStatus.connected} title={wbStatus.seller_name ?? undefined}>
-                {wbStatus.connected
-                  ? `${wbStatus.is_mock ? '🧪 ' : ''}${wbStatus.seller_name || 'Подключено'}`
-                  : 'Не подключено'}
-              </StatusBadge>
-            )}
-            {!wbStatus?.connected && (
-              <RouterNavLink to="/settings">
-                <Button $variant="primary" as="span">
-                  Подключить
-                </Button>
-              </RouterNavLink>
-            )}
-          </HeaderActions>
         </Header>
         <Content>
           <Outlet />

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_session
-from app.models.database import WBAccount
+from app.models.database import DataSourceConfig, WBAccount
 from app.schemas.api import (
     DATA_SOURCE_META,
     DashboardData,
@@ -94,9 +94,7 @@ async def wb_status(session: AsyncSession = Depends(get_session)):
 
 
 @router.post("/wb/connect", response_model=WBConnectionStatus)
-async def wb_connect(
-    body: WBTokenRequest, session: AsyncSession = Depends(get_session)
-):
+async def wb_connect(body: WBTokenRequest, session: AsyncSession = Depends(get_session)):
     use_mock = is_mock_token(body.api_token)
     if use_mock and not settings.mock_wb:
         raise HTTPException(status_code=400, detail="Mock-токены отключены")
@@ -119,9 +117,7 @@ async def wb_connect(
 
     name = info.get("name") or info.get("tradeMark") or "Продавец"
     message = "Демо-режим (mock)" if use_mock else "Подключено"
-    return WBConnectionStatus(
-        connected=True, message=message, seller_name=name, is_mock=use_mock
-    )
+    return WBConnectionStatus(connected=True, message=message, seller_name=name, is_mock=use_mock)
 
 
 @router.delete("/wb/disconnect")
@@ -210,6 +206,6 @@ async def sync_data(
     ]
 
 
-@router.get("/dashboard", response_model=DashboardData)
-async def get_dashboard(session: AsyncSession = Depends(get_session)):
+@router.get("/dashboard/legacy", response_model=DashboardData)
+async def get_dashboard_legacy(session: AsyncSession = Depends(get_session)):
     return await build_dashboard_from_cache(session)

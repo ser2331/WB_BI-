@@ -11,13 +11,13 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
-        value: "3.12.10"
+        value: '3.12.10'
       - key: DEBUG
-        value: "false"
+        value: 'false'
       - key: MOCK_WB
-        value: "true"
+        value: 'true'
       - key: AUTO_SEED_MOCK
-        value: "true"
+        value: 'true'
       - key: DATABASE_URL
         value: sqlite+aiosqlite:////tmp/wb_bi.db
       - key: CORS_ORIGINS

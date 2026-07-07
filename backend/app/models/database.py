@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import JSON, Boolean, DateTime, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -9,7 +9,7 @@ class Base(DeclarativeBase):
     pass
 
 
-class DataSourceKey(str, Enum):
+class DataSourceKey(StrEnum):
     SALES = "sales"
     ORDERS = "orders"
     STOCKS = "stocks"

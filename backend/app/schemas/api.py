@@ -1,10 +1,10 @@
 from datetime import date, datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class DataSourceKey(str, Enum):
+class DataSourceKey(StrEnum):
     SALES = "sales"
     ORDERS = "orders"
     STOCKS = "stocks"

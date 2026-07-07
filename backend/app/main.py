@@ -5,14 +5,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
-from app.api.routes import router
+from app.api.dashboard_routes import router as dashboard_router
+from app.api.import_routes import router as import_router
+from app.api.routes import router as legacy_router
 from app.config import settings
-from app.database import init_db
+from app.database import async_session, init_db
 from app.models.database import WBAccount
 from app.services.data_sync import ensure_data_sources
+from app.services.dataset_memory import load_from_disk
 from app.services.mock.token import is_mock_token
 from app.services.mock_seed import seed_mock_analytics
-from app.database import async_session
 
 logging.basicConfig(level=logging.INFO if settings.debug else logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -31,14 +33,16 @@ async def lifespan(app: FastAPI):
             if account is None or is_mock_token(account.api_token):
                 await seed_mock_analytics(session)
                 logger.info("Mock JWT and analytics data seeded")
+    if load_from_disk():
+        logger.info("Imported dataset restored from disk")
     logger.info("WB BI backend started (mock_wb=%s)", settings.mock_wb)
     yield
 
 
 app = FastAPI(
     title="WB BI",
-    description="Business Intelligence для продавцов Wildberries",
-    version="0.1.0",
+    description="Импорт данных и дашборд склеек по предметам",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
@@ -51,7 +55,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(import_router)
+app.include_router(dashboard_router)
+app.include_router(legacy_router)
 
 
 @app.get("/")

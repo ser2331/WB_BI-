@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Any
 
 import httpx
@@ -84,9 +84,7 @@ class WBClient:
             return False
 
     async def get_seller_info(self) -> dict:
-        return await self._request(
-            "GET", COMMON_API, "/api/v1/seller-info", category="common"
-        )
+        return await self._request("GET", COMMON_API, "/api/v1/seller-info", category="common")
 
     async def get_sales(self, date_from: datetime) -> list[dict]:
         return await self._request(
@@ -115,9 +113,7 @@ class WBClient:
             params={"dateFrom": date_from.strftime("%Y-%m-%dT%H:%M:%S")},
         )
 
-    async def get_sales_funnel(
-        self, date_from: date, date_to: date
-    ) -> list[dict]:
+    async def get_sales_funnel(self, date_from: date, date_to: date) -> list[dict]:
         body = {
             "selectedPeriod": {
                 "start": date_from.isoformat(),

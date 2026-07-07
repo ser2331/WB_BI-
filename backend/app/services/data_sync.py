@@ -39,12 +39,8 @@ async def ensure_data_sources(session: AsyncSession) -> None:
     await session.commit()
 
 
-async def save_cached_data(
-    session: AsyncSession, source_key: str, data: dict
-) -> None:
-    await session.execute(
-        delete(CachedData).where(CachedData.source_key == source_key)
-    )
+async def save_cached_data(session: AsyncSession, source_key: str, data: dict) -> None:
+    await session.execute(delete(CachedData).where(CachedData.source_key == source_key))
     session.add(
         CachedData(
             source_key=source_key,
@@ -54,9 +50,7 @@ async def save_cached_data(
     )
 
 
-async def sync_source(
-    session: AsyncSession, client, source_key: str
-) -> tuple[bool, str, int]:
+async def sync_source(session: AsyncSession, client, source_key: str) -> tuple[bool, str, int]:
     date_from = datetime.utcnow() - timedelta(days=30)
 
     try:

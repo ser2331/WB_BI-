@@ -34,19 +34,17 @@ async def get_cached_by_key(session: AsyncSession, source_key: str) -> dict | No
 
 async def get_last_updated(session: AsyncSession) -> datetime | None:
     result = await session.execute(
-        select(CachedData.fetched_at)
-        .order_by(CachedData.fetched_at.desc())
-        .limit(1)
+        select(CachedData.fetched_at).order_by(CachedData.fetched_at.desc()).limit(1)
     )
     return result.scalar_one_or_none()
 
 
 def build_dashboard(
-  sales_data: dict | None,
-  orders_data: dict | None,
-  stocks_data: dict | None,
-  funnel_data: dict | None,
-  last_updated: datetime | None,
+    sales_data: dict | None,
+    orders_data: dict | None,
+    stocks_data: dict | None,
+    funnel_data: dict | None,
+    last_updated: datetime | None,
 ) -> DashboardData:
     sales_records = (sales_data or {}).get("records", [])
     orders_records = (orders_data or {}).get("records", [])
@@ -89,7 +87,7 @@ def build_dashboard(
             product_stats[nm_id]["orders"] += 1
 
     total_stock = sum(_safe_float(s.get("quantity", s.get("quantityFull"))) for s in stocks_records)
-    unique_skus = len({s.get("nmId") for s in stocks_records if s.get("nmId")})
+    len({s.get("nmId") for s in stocks_records if s.get("nmId")})
 
     funnel_opens = 0
     funnel_cart = 0
@@ -127,9 +125,7 @@ def build_dashboard(
     ]
 
     orders_chart = [
-        ChartPoint(date=day, value=float(val))
-        for day, val in sorted(orders_by_day.items())
-        if day
+        ChartPoint(date=day, value=float(val)) for day, val in sorted(orders_by_day.items()) if day
     ]
 
     top_products = sorted(
