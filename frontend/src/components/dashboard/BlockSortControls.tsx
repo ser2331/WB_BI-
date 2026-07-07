@@ -21,12 +21,7 @@ interface Props {
   onSortDirToggle: () => void;
 }
 
-export function BlockSortControls({
-  sortBy,
-  sortDir,
-  onSortByChange,
-  onSortDirToggle,
-}: Props) {
+export function BlockSortControls({ sortBy, sortDir, onSortByChange, onSortDirToggle }: Props) {
   const dirLabel = useMemo(
     () => (sortDir === 'desc' ? 'По убыванию' : 'По возрастанию'),
     [sortDir]

@@ -1,14 +1,7 @@
 import type { GlueBlock } from '@/types/dashboard';
 
 export type BlockSortField =
-  | 'orders'
-  | 'sales'
-  | 'stock'
-  | 'ad_ctr'
-  | 'spp'
-  | 'kvv'
-  | 'title'
-  | 'skuCount';
+  'orders' | 'sales' | 'stock' | 'ad_ctr' | 'spp' | 'kvv' | 'title' | 'skuCount';
 
 export type SortDirection = 'asc' | 'desc';
 

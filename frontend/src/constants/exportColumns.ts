@@ -13,8 +13,8 @@ export const PRODUCT_EXPORT_COLUMNS: CsvColumn<ProductTableRow>[] = [
   { header: 'Заказы', value: (r) => r.orders },
   { header: 'Продажи', value: (r) => r.sales },
   { header: 'Остаток', value: (r) => r.stock },
-  { header: 'СПП', value: (r) => r.spp != null ? fmtPct(r.spp) : '' },
-  { header: 'CTR', value: (r) => r.ad_ctr != null ? fmtPct(r.ad_ctr) : '' },
+  { header: 'СПП', value: (r) => (r.spp != null ? fmtPct(r.spp) : '') },
+  { header: 'CTR', value: (r) => (r.ad_ctr != null ? fmtPct(r.ad_ctr) : '') },
 ];
 
 export const CATEGORY_EXPORT_COLUMNS: CsvColumn<CategorySummary>[] = [
@@ -91,18 +91,18 @@ export const BLOCK_EXPORT_COLUMNS: CsvColumn<BlockExportRow>[] = [
   { header: 'Заказы склейки', value: (r) => r.orders },
   { header: 'Продажи склейки', value: (r) => r.sales },
   { header: 'Остаток склейки', value: (r) => r.stock },
-  { header: 'СПП склейки', value: (r) => r.spp != null ? fmtPct(r.spp) : '' },
-  { header: 'КВВ склейки', value: (r) => r.kvv != null ? fmtPct(r.kvv) : '' },
-  { header: 'CTR склейки', value: (r) => r.ad_ctr != null ? fmtPct(r.ad_ctr) : '' },
+  { header: 'СПП склейки', value: (r) => (r.spp != null ? fmtPct(r.spp) : '') },
+  { header: 'КВВ склейки', value: (r) => (r.kvv != null ? fmtPct(r.kvv) : '') },
+  { header: 'CTR склейки', value: (r) => (r.ad_ctr != null ? fmtPct(r.ad_ctr) : '') },
   { header: 'SKU', value: (r) => r.nm },
   { header: 'Артикул', value: (r) => r.vendor_code },
   { header: 'Бренд SKU', value: (r) => r.product_brand },
   { header: 'Заказы SKU', value: (r) => r.product_orders },
   { header: 'Продажи SKU', value: (r) => r.product_sales },
   { header: 'Остаток SKU', value: (r) => r.product_stock },
-  { header: 'СПП SKU', value: (r) => r.product_spp != null ? fmtPct(r.product_spp) : '' },
-  { header: 'КВВ SKU', value: (r) => r.product_kvv != null ? fmtPct(r.product_kvv) : '' },
-  { header: 'CTR SKU', value: (r) => r.product_ad_ctr != null ? fmtPct(r.product_ad_ctr) : '' },
+  { header: 'СПП SKU', value: (r) => (r.product_spp != null ? fmtPct(r.product_spp) : '') },
+  { header: 'КВВ SKU', value: (r) => (r.product_kvv != null ? fmtPct(r.product_kvv) : '') },
+  { header: 'CTR SKU', value: (r) => (r.product_ad_ctr != null ? fmtPct(r.product_ad_ctr) : '') },
 ];
 
 export function formatExportFilename(prefix: string): string {

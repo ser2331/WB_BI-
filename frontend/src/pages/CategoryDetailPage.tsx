@@ -25,11 +25,7 @@ import {
 } from '@/constants/exportColumns';
 import { fetchAllBlocks } from '@/utils/fetchAllPages';
 import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
-import {
-  sortGlueBlocks,
-  type BlockSortField,
-  type SortDirection,
-} from '@/utils/sortGlueBlocks';
+import { sortGlueBlocks, type BlockSortField, type SortDirection } from '@/utils/sortGlueBlocks';
 import { Button, Card, Empty, Space } from 'antd';
 
 export function CategoryDetailPage() {
@@ -190,9 +186,7 @@ export function CategoryDetailPage() {
                 sortBy={blockSortBy}
                 sortDir={blockSortDir}
                 onSortByChange={setBlockSortBy}
-                onSortDirToggle={() =>
-                  setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))
-                }
+                onSortDirToggle={() => setBlockSortDir((dir) => (dir === 'desc' ? 'asc' : 'desc'))}
               />
               <Button
                 icon={<DownloadOutlined />}
