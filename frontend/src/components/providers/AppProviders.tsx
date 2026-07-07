@@ -1,4 +1,4 @@
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, App as AntApp } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import type { ReactNode } from 'react';
 import { useAppSelector } from '@/store/hooks';
@@ -13,7 +13,7 @@ export function AppProviders({ children }: Props) {
 
   return (
     <ConfigProvider locale={ruRU} theme={buildAntdTheme(mode)}>
-      {children}
+      <AntApp>{children}</AntApp>
     </ConfigProvider>
   );
 }

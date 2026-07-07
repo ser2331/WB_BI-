@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { InboxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { App, Modal } from 'antd';
 import { useClearImportMutation, useImportFileMutation } from '@/api/wbApi';
 import { getErrorMessage } from '@/api/error';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
@@ -10,8 +11,8 @@ import type { UploadFile } from 'antd';
 
 export function ImportPage() {
   const navigate = useNavigate();
+  const { message } = App.useApp();
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const [importFile, { isLoading: importing }] = useImportFileMutation();
@@ -26,10 +27,9 @@ export function ImportPage() {
       return;
     }
     setError(null);
-    setSuccess(null);
     try {
       const result = await importFile(selectedFile).unwrap();
-      setSuccess(
+      message.success(
         `${result.message}: ${result.blocks_count} склеек, ${result.products_count} товаров`
       );
       setTimeout(() => {
@@ -40,16 +40,24 @@ export function ImportPage() {
     }
   };
 
-  const handleClear = async () => {
-    setError(null);
-    setSuccess(null);
-    try {
-      await clearImport().unwrap();
-      setFileList([]);
-      setSuccess('Загруженные данные удалены');
-    } catch (e) {
-      setError(getErrorMessage(e, 'Ошибка удаления'));
-    }
+  const handleClear = () => {
+    Modal.confirm({
+      title: 'Удалить все загруженные данные?',
+      content: 'Это действие нельзя отменить. Дашборд станет пустым до следующего импорта.',
+      okText: 'Удалить',
+      okType: 'danger',
+      cancelText: 'Отмена',
+      onOk: async () => {
+        setError(null);
+        try {
+          await clearImport().unwrap();
+          setFileList([]);
+          message.success('Загруженные данные удалены');
+        } catch (e) {
+          setError(getErrorMessage(e, 'Ошибка удаления'));
+        }
+      },
+    });
   };
 
   return (
@@ -58,7 +66,6 @@ export function ImportPage() {
       busy={uploading}
       busyText={importing ? 'Загрузка и обработка файла…' : 'Удаление данных…'}
       error={error}
-      success={success}
     >
       <Card title="Импорт данных">
         <Typography.Paragraph type="secondary">
@@ -77,7 +84,6 @@ export function ImportPage() {
               return Upload.LIST_IGNORE;
             }
             setError(null);
-            setSuccess(null);
             setFileList([
               {
                 uid: file.uid,
@@ -104,7 +110,7 @@ export function ImportPage() {
         <Space wrap style={{ marginTop: 16 }}>
           <Button
             type="primary"
-            onClick={handleUpload}
+            onClick={() => void handleUpload()}
             loading={importing}
             disabled={!selectedFile}
           >

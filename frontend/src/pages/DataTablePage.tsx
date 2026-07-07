@@ -1,4 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { DownloadOutlined } from '@ant-design/icons';
+import { App } from 'antd';
 import {
   useGetDashboardFiltersQuery,
   useGetDashboardMetaQuery,
@@ -7,12 +9,20 @@ import {
 import { getErrorMessage } from '@/api/error';
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
+import {
+  formatCountLabel,
+  formatExportFilename,
+  PRODUCT_EXPORT_COLUMNS,
+} from '@/constants/exportColumns';
+import { fetchAllProducts } from '@/utils/fetchAllPages';
+import { downloadCsv, rowsToCsv } from '@/utils/exportCsv';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
 import { fmtNum, fmtPct } from '@/utils/format';
 import type { ProductTableRow } from '@/types/dashboardApi';
-import { Card, Empty, Table, Typography } from 'antd';
+import { Button, Card, Empty, Table, Typography } from 'antd';
 import type { TableProps } from 'antd';
 
 function rowKey(row: ProductTableRow) {
@@ -20,6 +30,8 @@ function rowKey(row: ProductTableRow) {
 }
 
 export function DataTablePage() {
+  const { message } = App.useApp();
+  const [exporting, setExporting] = useState(false);
   const { params, apiQuery, setParams } = useDashboardParams(25);
 
   const { data: meta, isLoading: metaLoading, error: metaError } = useGetDashboardMetaQuery();
@@ -129,6 +141,23 @@ export function DataTablePage() {
     [params.sortBy, params.sortDir]
   );
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const rows = await fetchAllProducts(apiQuery);
+      if (!rows.length) {
+        message.warning('Нет данных для экспорта');
+        return;
+      }
+      downloadCsv(formatExportFilename('products'), rowsToCsv(rows, PRODUCT_EXPORT_COLUMNS));
+      message.success(`Экспортировано ${formatCountLabel(rows.length)} товаров`);
+    } catch {
+      message.error('Не удалось экспортировать данные');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={layoutClass.dashboardRoot}>
@@ -140,9 +169,7 @@ export function DataTablePage() {
   if (!hasData) {
     return (
       <div className={layoutClass.dashboardRoot}>
-        <Card>
-          <Empty description="Данные ещё не загружены" />
-        </Card>
+        <EmptyDataState description="Данные ещё не загружены" />
       </div>
     );
   }
@@ -188,7 +215,18 @@ export function DataTablePage() {
       </section>
 
       <section className={layoutClass.dashboardSection}>
-        <Card title={`Все товары (${data?.total ?? 0})`}>
+        <Card
+          title={`Все товары (${data?.total ?? 0})`}
+          extra={
+            <Button
+              icon={<DownloadOutlined />}
+              loading={exporting}
+              onClick={() => void handleExport()}
+            >
+              Экспорт CSV
+            </Button>
+          }
+        >
           <Table<ProductTableRow>
             rowKey={rowKey}
             size="middle"
@@ -196,6 +234,7 @@ export function DataTablePage() {
             columns={columns}
             dataSource={data?.items ?? []}
             pagination={false}
+            locale={{ emptyText: <Empty description="По фильтрам товары не найдены" /> }}
             onChange={(_pagination, _filters, sorter) => {
               const entry = Array.isArray(sorter) ? sorter[0] : sorter;
               if (!entry?.field || !entry.order) return;

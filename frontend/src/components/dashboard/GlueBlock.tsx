@@ -1,24 +1,29 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import type { GlueBlock as GlueBlockType } from '@/types/dashboard';
+import { METRIC_HINTS } from '@/constants/metricHints';
+import { MetricLabel } from '@/components/ui/MetricLabel';
 import { fmtNum, fmtPct } from '@/utils/format';
+import { sortProductsByOrders } from '@/utils/sortGlueBlocks';
 import { ProductCard } from './ProductCard';
 import { layoutClass } from './dashboard.layout';
 import { Card, Col, Row, Statistic, Typography } from 'antd';
 
 const MetricCell = memo(function MetricCell({
   label,
+  hint,
   value,
   digits = 0,
   percent = false,
 }: {
   label: string;
+  hint?: string;
   value: number | null | undefined;
   digits?: number;
   percent?: boolean;
 }) {
   return (
     <Statistic
-      title={label}
+      title={<MetricLabel label={label} hint={hint} />}
       value={percent ? fmtPct(value, digits) : fmtNum(value, digits)}
       valueStyle={{ fontSize: 16 }}
     />
@@ -26,6 +31,7 @@ const MetricCell = memo(function MetricCell({
 });
 
 export const GlueBlock = memo(function GlueBlock({ block }: { block: GlueBlockType }) {
+  const products = useMemo(() => sortProductsByOrders(block.products), [block.products]);
   return (
     <Card
       styles={{
@@ -46,29 +52,38 @@ export const GlueBlock = memo(function GlueBlock({ block }: { block: GlueBlockTy
       }
     >
       <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
-        <Col xs={8} sm={4} md={4}>
-          <MetricCell label="Заказано" value={block.orders} />
+        <Col xs={8} sm={4} md={3}>
+          <MetricCell label="Заказано" hint={METRIC_HINTS.orders} value={block.orders} />
         </Col>
-        <Col xs={8} sm={4} md={4}>
-          <MetricCell label="Продано" value={block.sales} />
+        <Col xs={8} sm={4} md={3}>
+          <MetricCell label="Продано" hint={METRIC_HINTS.sales} value={block.sales} />
         </Col>
-        <Col xs={8} sm={4} md={4}>
-          <MetricCell label="Остаток" value={block.stock} />
+        <Col xs={8} sm={4} md={3}>
+          <MetricCell label="Остаток" hint={METRIC_HINTS.stock} value={block.stock} />
         </Col>
-        <Col xs={8} sm={4} md={4}>
-          <MetricCell label="СПП" value={block.spp} digits={2} percent />
+        <Col xs={8} sm={4} md={3}>
+          <MetricCell label="СПП" hint={METRIC_HINTS.spp} value={block.spp} digits={2} percent />
         </Col>
-        <Col xs={8} sm={4} md={4}>
-          <MetricCell label="CTR рекл." value={block.ad_ctr} digits={2} percent />
+        <Col xs={8} sm={4} md={3}>
+          <MetricCell label="КВВ" hint={METRIC_HINTS.kvv} value={block.kvv} digits={2} percent />
+        </Col>
+        <Col xs={8} sm={4} md={3}>
+          <MetricCell
+            label="CTR рекл."
+            hint={METRIC_HINTS.ad_ctr}
+            value={block.ad_ctr}
+            digits={2}
+            percent
+          />
         </Col>
       </Row>
 
-      {block.products.length > 2 ? (
+      {products.length > 2 ? (
         <div className={layoutClass.scrollHint}>← листайте карточки →</div>
       ) : null}
 
       <div className={layoutClass.productsRow}>
-        {block.products.map((p) => (
+        {products.map((p) => (
           <ProductCard key={p.nm} product={p} />
         ))}
       </div>

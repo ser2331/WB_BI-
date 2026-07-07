@@ -8,11 +8,12 @@ import { ChartWidget, GroupedChartWidget } from '@/components/analytics/ChartWid
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
 import { HeroSection } from '@/components/dashboard/HeroSection';
 import { layoutClass } from '@/components/dashboard/dashboard.layout';
+import { EmptyDataState } from '@/components/ui/EmptyDataState';
 import { DashboardPageSkeleton } from '@/components/ui/skeletons/DashboardPageSkeleton';
 import { PageOverlay } from '@/components/ui/PageOverlay';
 import { useDashboardParams } from '@/hooks/useDashboardParams';
 import { fmtNum } from '@/utils/format';
-import { Card, Col, Empty, Row, Statistic } from 'antd';
+import { Card, Col, Row, Statistic } from 'antd';
 
 export function AnalyticsPage() {
   const { params, apiQuery, setParams } = useDashboardParams(15);
@@ -60,9 +61,7 @@ export function AnalyticsPage() {
   if (!hasData) {
     return (
       <div className={layoutClass.dashboardRoot}>
-        <Card>
-          <Empty description="Данные ещё не загружены. Импортируйте файл для просмотра аналитики." />
-        </Card>
+        <EmptyDataState description="Данные ещё не загружены. Импортируйте файл для просмотра аналитики." />
       </div>
     );
   }

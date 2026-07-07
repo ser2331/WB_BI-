@@ -1,5 +1,7 @@
 import { memo } from 'react';
 import type { ProductCard as ProductCardType } from '@/types/dashboard';
+import { METRIC_HINTS } from '@/constants/metricHints';
+import { MetricLabel } from '@/components/ui/MetricLabel';
 import { fmtNum, fmtPct } from '@/utils/format';
 import { ProductImage } from './ProductImage';
 import { Card, Col, Row, Space, Statistic, Tag, Typography } from 'antd';
@@ -35,19 +37,45 @@ export const ProductCard = memo(function ProductCard({ product }: Props) {
       <Row gutter={[8, 8]}>
         <Col span={12}>
           <Statistic
-            title="Заказано"
+            title={<MetricLabel label="Заказано" hint={METRIC_HINTS.orders} />}
             value={fmtNum(product.orders)}
             valueStyle={{ fontSize: 14 }}
           />
         </Col>
         <Col span={12}>
-          <Statistic title="Продано" value={fmtNum(product.sales)} valueStyle={{ fontSize: 14 }} />
+          <Statistic
+            title={<MetricLabel label="Продано" hint={METRIC_HINTS.sales} />}
+            value={fmtNum(product.sales)}
+            valueStyle={{ fontSize: 14 }}
+          />
         </Col>
         <Col span={12}>
-          <Statistic title="Остаток" value={fmtNum(product.stock)} valueStyle={{ fontSize: 14 }} />
+          <Statistic
+            title={<MetricLabel label="Остаток" hint={METRIC_HINTS.stock} />}
+            value={fmtNum(product.stock)}
+            valueStyle={{ fontSize: 14 }}
+          />
         </Col>
         <Col span={12}>
-          <Statistic title="CTR" value={fmtPct(product.ad_ctr)} valueStyle={{ fontSize: 14 }} />
+          <Statistic
+            title={<MetricLabel label="СПП" hint={METRIC_HINTS.spp} />}
+            value={fmtPct(product.spp)}
+            valueStyle={{ fontSize: 14 }}
+          />
+        </Col>
+        <Col span={12}>
+          <Statistic
+            title={<MetricLabel label="КВВ" hint={METRIC_HINTS.kvv} />}
+            value={fmtPct(product.kvv)}
+            valueStyle={{ fontSize: 14 }}
+          />
+        </Col>
+        <Col span={12}>
+          <Statistic
+            title={<MetricLabel label="CTR" hint={METRIC_HINTS.ad_ctr} />}
+            value={fmtPct(product.ad_ctr)}
+            valueStyle={{ fontSize: 14 }}
+          />
         </Col>
       </Row>
     </Card>
