@@ -44,7 +44,7 @@ function basketNumber(vol: number): string {
 function basketHosts(vol: number): string[] {
   const primary = Number(basketNumber(vol));
   const hosts: string[] = [];
-  for (let delta = 0; delta <= 3; delta += 1) {
+  for (let delta = 0; delta <= 1; delta += 1) {
     for (const n of [primary - delta, primary + delta]) {
       if (n < 1 || n > 40) continue;
       const host = `basket-${String(n).padStart(2, '0')}.wbbasket.ru`;
@@ -54,7 +54,7 @@ function basketHosts(vol: number): string[] {
   return hosts;
 }
 
-const IMAGE_SIZES = ['c516x688', 'big', 'c246x328', 'tm'] as const;
+const IMAGE_SIZES = ['c246x328', 'tm', 'big'] as const;
 const EXTENSIONS = ['webp', 'jpg'] as const;
 
 function wbPhotoCandidates(nm: string | number): string[] {

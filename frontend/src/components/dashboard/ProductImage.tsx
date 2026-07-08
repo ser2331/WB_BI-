@@ -37,6 +37,12 @@ export const ProductImage = memo(function ProductImage({ nm, photo, width = '100
     setLoaded(false);
   }, [resolved?.url]);
 
+  useEffect(() => {
+    if (resolvedRef.current || isFetching) return;
+    resolvedRef.current = true;
+    void resolvePhoto(nm);
+  }, [isFetching, nm, resolvePhoto]);
+
   const src = candidates[index];
   const showSkeleton = Boolean(src) && !failed && (!loaded || isFetching);
 
