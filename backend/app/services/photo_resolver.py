@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 _cache: dict[str, str | None] = {}
 _MAX_BASKET = 40
-_CARD_JSON_PROBES = 20
-_IMAGE_PROBES = 24
+_CARD_JSON_PROBES = 8
+_IMAGE_PROBES = 10
 
 
 def _basket_probe_order(vol: int) -> list[int]:
@@ -30,9 +30,13 @@ async def _probe_url(client: httpx.AsyncClient, url: str) -> bool:
         response = await client.head(url, follow_redirects=True)
         if response.status_code == 200:
             return True
-        if response.status_code == 405:
-            response = await client.get(url, follow_redirects=True)
-            return response.status_code == 200
+        if response.status_code in (400, 403, 405):
+            response = await client.get(
+                url,
+                follow_redirects=True,
+                headers={"Range": "bytes=0-0"},
+            )
+            return response.status_code in (200, 206)
     except Exception:
         return False
     return False

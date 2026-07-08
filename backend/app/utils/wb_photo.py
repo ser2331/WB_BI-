@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.schemas.dashboard_data import DashboardDataset
 
-IMAGE_SIZES = ("c516x688", "big", "c246x328", "tm")
+IMAGE_SIZES = ("c246x328", "tm", "big", "c516x688")
 EXTENSIONS = ("webp", "jpg")
 
 
@@ -94,7 +94,7 @@ def basket_number(vol: int) -> str:
 def basket_hosts(vol: int) -> list[str]:
     primary = int(basket_number(vol))
     hosts: list[str] = []
-    for delta in range(4):
+    for delta in range(2):
         for n in (primary - delta, primary + delta):
             if n < 1 or n > 40:
                 continue

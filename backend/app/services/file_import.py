@@ -126,14 +126,15 @@ def _build_blocks_from_products(
 
     blocks: list[GlueBlock] = []
     for (period_key, subject, group_key), items in groups.items():
-        brands = sorted({p.brand for p in items if p.brand})
-        orders = sum(p.orders or 0 for p in items)
-        sales = sum(p.sales or 0 for p in items)
-        stocks = [p.stock for p in items if p.stock is not None]
+        unique_items = _dedupe_products(items)
+        brands = sorted({p.brand for p in unique_items if p.brand})
+        orders = sum(p.orders or 0 for p in unique_items)
+        sales = sum(p.sales or 0 for p in unique_items)
+        stocks = [p.stock for p in unique_items if p.stock is not None]
         stock = sum(stocks) if stocks else None
-        spps = [p.spp for p in items if p.spp is not None]
-        kvv_vals = [p.kvv for p in items if p.kvv is not None]
-        ctrs = [p.ad_ctr for p in items if p.ad_ctr is not None]
+        spps = [p.spp for p in unique_items if p.spp is not None]
+        kvv_vals = [p.kvv for p in unique_items if p.kvv is not None]
+        ctrs = [p.ad_ctr for p in unique_items if p.ad_ctr is not None]
 
         title = meta.get("title") or f"{subject} · {group_key.split('|')[-1]}"
 
@@ -152,17 +153,29 @@ def _build_blocks_from_products(
                 blockId=f"{period_key}|{group_key}",
                 title=str(title),
                 brands=brands,
-                skuCount=len(items),
+                skuCount=len(unique_items),
                 orders=orders,
                 sales=sales,
                 stock=stock,
                 spp=sum(spps) / len(spps) if spps else None,
                 kvv=sum(kvv_vals) / len(kvv_vals) if kvv_vals else None,
                 ad_ctr=sum(ctrs) / len(ctrs) if ctrs else None,
-                products=items,
+                products=unique_items,
             )
         )
     return blocks
+
+
+def _dedupe_products(products: list[ProductCard]) -> list[ProductCard]:
+    deduped: list[ProductCard] = []
+    seen_nm: set[str] = set()
+    for product in products:
+        key = product.nm.strip()
+        if not key or key in seen_nm:
+            continue
+        seen_nm.add(key)
+        deduped.append(product)
+    return deduped
 
 
 def _build_summary(blocks: list[GlueBlock]) -> list[SummaryRow]:
@@ -342,14 +355,15 @@ def parse_csv_content(content: bytes) -> DashboardDataset:
 
     blocks: list[GlueBlock] = []
     for gkey, items in rows_by_block.items():
+        unique_items = _dedupe_products(items)
         bm = block_meta[gkey]
-        brands = sorted({p.brand for p in items if p.brand})
-        orders = sum(p.orders or 0 for p in items)
-        sales = sum(p.sales or 0 for p in items)
-        stocks = [p.stock for p in items if p.stock is not None]
-        spps = [p.spp for p in items if p.spp is not None]
-        kvv_vals = [p.kvv for p in items if p.kvv is not None]
-        ctrs = [p.ad_ctr for p in items if p.ad_ctr is not None]
+        brands = sorted({p.brand for p in unique_items if p.brand})
+        orders = sum(p.orders or 0 for p in unique_items)
+        sales = sum(p.sales or 0 for p in unique_items)
+        stocks = [p.stock for p in unique_items if p.stock is not None]
+        spps = [p.spp for p in unique_items if p.spp is not None]
+        kvv_vals = [p.kvv for p in unique_items if p.kvv is not None]
+        ctrs = [p.ad_ctr for p in unique_items if p.ad_ctr is not None]
         period_key, subject, group_key = gkey
 
         blocks.append(
@@ -361,14 +375,14 @@ def parse_csv_content(content: bytes) -> DashboardDataset:
                 blockId=f"{period_key}|{group_key}",
                 title=bm["title"],
                 brands=brands,
-                skuCount=len(items),
+                skuCount=len(unique_items),
                 orders=orders,
                 sales=sales,
                 stock=sum(stocks) if stocks else None,
                 spp=sum(spps) / len(spps) if spps else None,
                 kvv=sum(kvv_vals) / len(kvv_vals) if kvv_vals else None,
                 ad_ctr=sum(ctrs) / len(ctrs) if ctrs else None,
-                products=items,
+                products=unique_items,
             )
         )
 
